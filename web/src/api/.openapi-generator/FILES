@@ -2,6 +2,7 @@
 .npmignore
 api.ts
 api/customers-api.ts
+api/gateway-api.ts
 api/home-api.ts
 api/occtlapi.ts
 api/ocserv-groups-api.ts
@@ -25,6 +26,8 @@ models/customer-model-customer.ts
 models/customer-summary-data.ts
 models/customer-summary-response.ts
 models/customer-usage-response.ts
+models/gateway-create-user-data.ts
+models/gateway-create-user-response.ts
 models/group-unsynced-group.ts
 models/home-cpu.ts
 models/home-current-stats.ts

@@ -15,6 +15,7 @@
 
 
 export * from './api/customers-api';
+export * from './api/gateway-api';
 export * from './api/home-api';
 export * from './api/occtlapi';
 export * from './api/ocserv-groups-api';

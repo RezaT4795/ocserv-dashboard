@@ -443,6 +443,59 @@ const docTemplate = `{
                 }
             }
         },
+        "/gateway/users": {
+            "post": {
+                "description": "Creates a local ocserv user for an authenticated external gateway.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Gateway"
+                ],
+                "summary": "Gateway ocserv user creation",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer GATEWAY_API_TOKEN",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "gateway user create data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/gateway.CreateUserData"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/gateway.CreateUserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/request.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/middlewares.Unauthorized"
+                        }
+                    }
+                }
+            }
+        },
         "/home": {
             "get": {
                 "description": "Content of home",
@@ -3562,6 +3615,87 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "date_start": {
+                    "type": "string"
+                }
+            }
+        },
+        "gateway.CreateUserData": {
+            "type": "object",
+            "required": [
+                "group",
+                "password",
+                "traffic_type",
+                "username"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "maxLength": 1024
+                },
+                "expire_at": {
+                    "type": "string",
+                    "example": "2026-12-31"
+                },
+                "group": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 4
+                },
+                "traffic_limit_gb": {
+                    "type": "integer",
+                    "maximum": 100000,
+                    "minimum": 0
+                },
+                "traffic_type": {
+                    "type": "string",
+                    "enum": [
+                        "Free",
+                        "MonthlyTransmit",
+                        "MonthlyReceive",
+                        "MonthlyRxTx",
+                        "TotallyTransmit",
+                        "TotallyReceive",
+                        "TotallyRxTx"
+                    ]
+                },
+                "unlimited": {
+                    "type": "boolean"
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 2
+                }
+            }
+        },
+        "gateway.CreateUserResponse": {
+            "type": "object",
+            "properties": {
+                "expire_at": {
+                    "type": "string"
+                },
+                "group": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "remote_user_id": {
+                    "type": "string"
+                },
+                "traffic_limit_gb": {
+                    "type": "integer"
+                },
+                "traffic_type": {
+                    "type": "string"
+                },
+                "unlimited": {
+                    "type": "boolean"
+                },
+                "username": {
                     "type": "string"
                 }
             }

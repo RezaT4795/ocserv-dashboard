@@ -121,6 +121,65 @@ definitions:
     - date_end
     - date_start
     type: object
+  gateway.CreateUserData:
+    properties:
+      description:
+        maxLength: 1024
+        type: string
+      expire_at:
+        example: "2026-12-31"
+        type: string
+      group:
+        type: string
+      password:
+        maxLength: 64
+        minLength: 4
+        type: string
+      traffic_limit_gb:
+        maximum: 100000
+        minimum: 0
+        type: integer
+      traffic_type:
+        enum:
+        - Free
+        - MonthlyTransmit
+        - MonthlyReceive
+        - MonthlyRxTx
+        - TotallyTransmit
+        - TotallyReceive
+        - TotallyRxTx
+        type: string
+      unlimited:
+        type: boolean
+      username:
+        maxLength: 64
+        minLength: 2
+        type: string
+    required:
+    - group
+    - password
+    - traffic_type
+    - username
+    type: object
+  gateway.CreateUserResponse:
+    properties:
+      expire_at:
+        type: string
+      group:
+        type: string
+      password:
+        type: string
+      remote_user_id:
+        type: string
+      traffic_limit_gb:
+        type: integer
+      traffic_type:
+        type: string
+      unlimited:
+        type: boolean
+      username:
+        type: string
+    type: object
   group.UnsyncedGroup:
     properties:
       config:
@@ -1569,6 +1628,41 @@ paths:
       summary: Customer summary account
       tags:
       - Customers
+  /gateway/users:
+    post:
+      consumes:
+      - application/json
+      description: Creates a local ocserv user for an authenticated external gateway.
+      parameters:
+      - description: Bearer GATEWAY_API_TOKEN
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: gateway user create data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/gateway.CreateUserData'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/gateway.CreateUserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/request.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/middlewares.Unauthorized'
+      summary: Gateway ocserv user creation
+      tags:
+      - Gateway
   /home:
     get:
       consumes:

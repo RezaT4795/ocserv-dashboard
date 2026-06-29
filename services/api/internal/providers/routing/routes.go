@@ -4,6 +4,7 @@ import (
 	"github.com/labstack/echo/v4"
 	backupRoutes "github.com/mmtaee/ocserv-dashboard/api/internal/services/backup"
 	customerRoutes "github.com/mmtaee/ocserv-dashboard/api/internal/services/customer"
+	gatewayRoutes "github.com/mmtaee/ocserv-dashboard/api/internal/services/gateway"
 	homeRoutes "github.com/mmtaee/ocserv-dashboard/api/internal/services/home"
 	occtlRoutes "github.com/mmtaee/ocserv-dashboard/api/internal/services/occtl"
 	ocservGroupRoutes "github.com/mmtaee/ocserv-dashboard/api/internal/services/ocserv_group"
@@ -30,6 +31,9 @@ func Register(e *echo.Echo) {
 
 	// customers
 	customerRoutes.Routes(group)
+
+	// gateway
+	gatewayRoutes.Routes(group)
 
 	// reports
 	reportRoutes.Routes(group)

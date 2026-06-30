@@ -3,14 +3,15 @@ package repository
 import (
 	"context"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/mmtaee/ocserv-dashboard/api/pkg/request"
 	"github.com/mmtaee/ocserv-dashboard/common/models"
 	"github.com/mmtaee/ocserv-dashboard/common/ocserv/occtl"
 	"github.com/mmtaee/ocserv-dashboard/common/ocserv/user"
 	"github.com/mmtaee/ocserv-dashboard/common/pkg/database"
 	"gorm.io/gorm"
-	"strings"
-	"time"
 )
 
 type TopBandwidthUsers struct {
@@ -21,6 +22,11 @@ type TopBandwidthUsers struct {
 type TotalBandwidths struct {
 	RX float64 `json:"rx" validate:"required"`
 	TX float64 `json:"tx" validate:"required"`
+}
+
+type TrafficTotalsBytes struct {
+	RX int64 `json:"rx"`
+	TX int64 `json:"tx"`
 }
 
 type OcpasswdUser struct {
@@ -46,6 +52,7 @@ type OcservUserCRUD interface {
 
 type OcservUserStats interface {
 	UserStatistics(ctx context.Context, uid string, dateStart, dateEnd *time.Time) ([]models.DailyTraffic, error)
+	CurrentCycleTraffic(ctx context.Context, userID uint, usageResetAt *time.Time) (TrafficTotalsBytes, error)
 
 	TotalBandwidthUserDateRange(ctx context.Context, uid string, dateStart, dateEnd *time.Time) (TotalBandwidths, error)
 	UserSessionLogs(ctx context.Context, pagination *request.Pagination, username string, dateStart, dateEnd *time.Time) (*[]models.OcservUserSessionLog, int64, error)
@@ -384,6 +391,33 @@ func (o *OcservUserRepository) UserStatistics(ctx context.Context, uid string, d
 		return nil, err
 	}
 	return results, nil
+}
+
+func (o *OcservUserRepository) CurrentCycleTraffic(
+	ctx context.Context,
+	userID uint,
+	usageResetAt *time.Time,
+) (TrafficTotalsBytes, error) {
+	now := time.Now()
+	startOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+	endOfMonth := startOfMonth.AddDate(0, 1, 0)
+
+	startAt := startOfMonth
+	if usageResetAt != nil && usageResetAt.After(startAt) {
+		startAt = *usageResetAt
+	}
+
+	var total TrafficTotalsBytes
+	err := o.db.WithContext(ctx).
+		Model(&models.OcservUserTrafficStatistics{}).
+		Select(`
+			COALESCE(SUM(rx), 0) AS rx,
+			COALESCE(SUM(tx), 0) AS tx
+		`).
+		Where("oc_user_id = ? AND created_at >= ? AND created_at < ?", userID, startAt, endOfMonth).
+		Scan(&total).Error
+
+	return total, err
 }
 
 func (o *OcservUserRepository) TotalBandwidthUserDateRange(ctx context.Context, uid string, dateStart, dateEnd *time.Time) (TotalBandwidths, error) {

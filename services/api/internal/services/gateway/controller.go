@@ -12,6 +12,7 @@ import (
 	"github.com/mmtaee/ocserv-dashboard/api/internal/repository"
 	"github.com/mmtaee/ocserv-dashboard/api/pkg/request"
 	"github.com/mmtaee/ocserv-dashboard/common/models"
+	"gorm.io/gorm"
 )
 
 const bytesInGiB int64 = 1024 * 1024 * 1024
@@ -94,11 +95,7 @@ func (ctl *Controller) CreateUser(c echo.Context) error {
 		return ctl.request.BadRequest(c, fmt.Errorf("failed to create ocserv user: %w", err))
 	}
 
-	var expireAtResponse *string
-	if created.ExpireAt != nil {
-		formatted := created.ExpireAt.Format("2006-01-02")
-		expireAtResponse = &formatted
-	}
+	expireAtResponse := formatDate(created.ExpireAt)
 
 	return c.JSON(http.StatusCreated, CreateUserResponse{
 		RemoteUserID:   created.UID,
@@ -110,4 +107,124 @@ func (ctl *Controller) CreateUser(c echo.Context) error {
 		TrafficType:    created.TrafficType,
 		TrafficLimitGB: trafficLimitGB,
 	})
+}
+
+// UserStatus returns live ocserv user status and traffic usage for an external gateway.
+//
+// @Summary      Gateway ocserv user status
+// @Description  Returns live status, expiry, traffic limit, consumed traffic, and remaining traffic for a gateway-created user.
+// @Tags         Gateway
+// @Accept       json
+// @Produce      json
+// @Param        Authorization header string true "Bearer GATEWAY_API_TOKEN"
+// @Param        username path string true "Ocserv username"
+// @Failure      400 {object} request.ErrorResponse
+// @Failure      401 {object} middlewares.Unauthorized
+// @Failure      404 {object} request.ErrorResponse
+// @Success      200 {object} UserStatusResponse
+// @Router       /gateway/users/{username}/status [get]
+func (ctl *Controller) UserStatus(c echo.Context) error {
+	username := strings.TrimSpace(c.Param("username"))
+	if username == "" {
+		return ctl.request.BadRequest(c, errors.New("username is required"))
+	}
+
+	ctx := c.Request().Context()
+
+	user, err := ctl.ocservUserRepo.GetByUsername(ctx, username)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.JSON(http.StatusNotFound, request.ErrorResponse{
+				Error:   []string{"user not found"},
+				Message: []string{},
+			})
+		}
+
+		return ctl.request.BadRequest(c, err)
+	}
+
+	rxBytes := int64(user.Rx)
+	txBytes := int64(user.Tx)
+
+	if isMonthlyTrafficType(user.TrafficType) {
+		currentCycleTraffic, err := ctl.ocservUserRepo.CurrentCycleTraffic(
+			ctx,
+			user.ID,
+			user.UsageResetAt,
+		)
+		if err != nil {
+			return ctl.request.BadRequest(c, err)
+		}
+
+		rxBytes = currentCycleTraffic.RX
+		txBytes = currentCycleTraffic.TX
+	}
+
+	consumedBytes := consumedTrafficBytes(user.TrafficType, rxBytes, txBytes)
+
+	remainingBytes := user.TrafficSize - consumedBytes
+	if remainingBytes < 0 {
+		remainingBytes = 0
+	}
+
+	return c.JSON(http.StatusOK, UserStatusResponse{
+		RemoteUserID:          user.UID,
+		Username:              user.Username,
+		Group:                 user.Group,
+		Active:                user.DeactivatedAt == nil && !user.IsLocked,
+		Locked:                user.IsLocked,
+		Deactivated:           user.DeactivatedAt != nil,
+		Unlimited:             user.ExpireAt == nil,
+		ExpireAt:              formatDate(user.ExpireAt),
+		DeactivatedAt:         formatDate(user.DeactivatedAt),
+		TrafficType:           user.TrafficType,
+		TrafficLimitGB:        bytesToGiB(user.TrafficSize),
+		TrafficConsumedGB:     bytesToGiB(consumedBytes),
+		TrafficRemainingGB:    bytesToGiB(remainingBytes),
+		RxGB:                  bytesToGiB(rxBytes),
+		TxGB:                  bytesToGiB(txBytes),
+		TrafficLimitBytes:     user.TrafficSize,
+		TrafficConsumedBytes:  consumedBytes,
+		TrafficRemainingBytes: remainingBytes,
+		RxBytes:               rxBytes,
+		TxBytes:               txBytes,
+	})
+}
+
+func isMonthlyTrafficType(trafficType string) bool {
+	switch trafficType {
+	case models.MonthlyTransmit, models.MonthlyReceive, models.MonthlyRxTx:
+		return true
+	default:
+		return false
+	}
+}
+
+func consumedTrafficBytes(trafficType string, rxBytes int64, txBytes int64) int64 {
+	switch trafficType {
+	case models.TotallyTransmit, models.MonthlyTransmit:
+		return txBytes
+
+	case models.TotallyReceive, models.MonthlyReceive:
+		return rxBytes
+
+	case models.TotallyRxTx, models.MonthlyRxTx, models.Free:
+		return rxBytes + txBytes
+
+	default:
+		return rxBytes + txBytes
+	}
+}
+
+func bytesToGiB(value int64) float64 {
+	return float64(value) / float64(bytesInGiB)
+}
+
+func formatDate(value *time.Time) *string {
+	if value == nil {
+		return nil
+	}
+
+	formatted := value.Format("2006-01-02")
+	return &formatted
 }

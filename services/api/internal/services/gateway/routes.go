@@ -8,4 +8,5 @@ func Routes(e *echo.Group) {
 	g := e.Group("/gateway", tokenMiddleware())
 
 	g.POST("/users", ctl.CreateUser)
+	g.GET("/users/:username/status", ctl.UserStatus)
 }

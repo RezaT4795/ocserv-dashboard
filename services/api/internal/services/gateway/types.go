@@ -21,3 +21,26 @@ type CreateUserResponse struct {
 	TrafficType    string  `json:"traffic_type"`
 	TrafficLimitGB int     `json:"traffic_limit_gb"`
 }
+
+type UserStatusResponse struct {
+	RemoteUserID          string  `json:"remote_user_id"`
+	Username              string  `json:"username"`
+	Group                 string  `json:"group"`
+	Active                bool    `json:"active"`
+	Locked                bool    `json:"locked"`
+	Deactivated           bool    `json:"deactivated"`
+	Unlimited             bool    `json:"unlimited"`
+	ExpireAt              *string `json:"expire_at,omitempty"`
+	DeactivatedAt         *string `json:"deactivated_at,omitempty"`
+	TrafficType           string  `json:"traffic_type"`
+	TrafficLimitGB        float64 `json:"traffic_limit_gb"`
+	TrafficConsumedGB     float64 `json:"traffic_consumed_gb"`
+	TrafficRemainingGB    float64 `json:"traffic_remaining_gb"`
+	RxGB                  float64 `json:"rx_gb"`
+	TxGB                  float64 `json:"tx_gb"`
+	TrafficLimitBytes     int64   `json:"traffic_limit_bytes"`
+	TrafficConsumedBytes  int64   `json:"traffic_consumed_bytes"`
+	TrafficRemainingBytes int64   `json:"traffic_remaining_bytes"`
+	RxBytes               int64   `json:"rx_bytes"`
+	TxBytes               int64   `json:"tx_bytes"`
+}

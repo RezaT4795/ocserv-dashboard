@@ -489,6 +489,63 @@
                 }
             }
         },
+        "/gateway/users/{username}/status": {
+            "get": {
+                "description": "Returns live status, expiry, traffic limit, consumed traffic, and remaining traffic for a gateway-created user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Gateway"
+                ],
+                "summary": "Gateway ocserv user status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer GATEWAY_API_TOKEN",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Ocserv username",
+                        "name": "username",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/gateway.UserStatusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/request.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/middlewares.Unauthorized"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/request.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/home": {
             "get": {
                 "description": "Content of home",
@@ -3684,6 +3741,71 @@
                 },
                 "traffic_type": {
                     "type": "string"
+                },
+                "unlimited": {
+                    "type": "boolean"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "gateway.UserStatusResponse": {
+            "type": "object",
+            "properties": {
+                "active": {
+                    "type": "boolean"
+                },
+                "deactivated": {
+                    "type": "boolean"
+                },
+                "deactivated_at": {
+                    "type": "string"
+                },
+                "expire_at": {
+                    "type": "string"
+                },
+                "group": {
+                    "type": "string"
+                },
+                "locked": {
+                    "type": "boolean"
+                },
+                "remote_user_id": {
+                    "type": "string"
+                },
+                "rx_bytes": {
+                    "type": "integer"
+                },
+                "rx_gb": {
+                    "type": "number"
+                },
+                "traffic_consumed_bytes": {
+                    "type": "integer"
+                },
+                "traffic_consumed_gb": {
+                    "type": "number"
+                },
+                "traffic_limit_bytes": {
+                    "type": "integer"
+                },
+                "traffic_limit_gb": {
+                    "type": "number"
+                },
+                "traffic_remaining_bytes": {
+                    "type": "integer"
+                },
+                "traffic_remaining_gb": {
+                    "type": "number"
+                },
+                "traffic_type": {
+                    "type": "string"
+                },
+                "tx_bytes": {
+                    "type": "integer"
+                },
+                "tx_gb": {
+                    "type": "number"
                 },
                 "unlimited": {
                     "type": "boolean"

@@ -26,6 +26,8 @@ import type { GatewayCreateUserData } from '../models';
 // @ts-ignore
 import type { GatewayCreateUserResponse } from '../models';
 // @ts-ignore
+import type { GatewayUserStatusResponse } from '../models';
+// @ts-ignore
 import type { MiddlewaresUnauthorized } from '../models';
 // @ts-ignore
 import type { RequestErrorResponse } from '../models';
@@ -77,6 +79,46 @@ export const GatewayApiAxiosParamCreator = function (configuration?: Configurati
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * Returns live status, expiry, traffic limit, consumed traffic, and remaining traffic for a gateway-created user.
+         * @summary Gateway ocserv user status
+         * @param {string} authorization Bearer GATEWAY_API_TOKEN
+         * @param {string} username Ocserv username
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        gatewayUsersUsernameStatusGet: async (authorization: string, username: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'authorization' is not null or undefined
+            assertParamExists('gatewayUsersUsernameStatusGet', 'authorization', authorization)
+            // verify required parameter 'username' is not null or undefined
+            assertParamExists('gatewayUsersUsernameStatusGet', 'username', username)
+            const localVarPath = `/gateway/users/{username}/status`
+                .replace(`{${"username"}}`, encodeURIComponent(String(username)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            if (authorization != null) {
+                localVarHeaderParameter['Authorization'] = String(authorization);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -101,6 +143,20 @@ export const GatewayApiFp = function(configuration?: Configuration) {
             const localVarOperationServerBasePath = operationServerMap['GatewayApi.gatewayUsersPost']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
+        /**
+         * Returns live status, expiry, traffic limit, consumed traffic, and remaining traffic for a gateway-created user.
+         * @summary Gateway ocserv user status
+         * @param {string} authorization Bearer GATEWAY_API_TOKEN
+         * @param {string} username Ocserv username
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async gatewayUsersUsernameStatusGet(authorization: string, username: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GatewayUserStatusResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.gatewayUsersUsernameStatusGet(authorization, username, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['GatewayApi.gatewayUsersUsernameStatusGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
     }
 };
 
@@ -120,6 +176,16 @@ export const GatewayApiFactory = function (configuration?: Configuration, basePa
          */
         gatewayUsersPost(requestParameters: GatewayApiGatewayUsersPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<GatewayCreateUserResponse> {
             return localVarFp.gatewayUsersPost(requestParameters.authorization, requestParameters.request, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Returns live status, expiry, traffic limit, consumed traffic, and remaining traffic for a gateway-created user.
+         * @summary Gateway ocserv user status
+         * @param {GatewayApiGatewayUsersUsernameStatusGetRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        gatewayUsersUsernameStatusGet(requestParameters: GatewayApiGatewayUsersUsernameStatusGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<GatewayUserStatusResponse> {
+            return localVarFp.gatewayUsersUsernameStatusGet(requestParameters.authorization, requestParameters.username, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -146,6 +212,27 @@ export interface GatewayApiGatewayUsersPostRequest {
 }
 
 /**
+ * Request parameters for gatewayUsersUsernameStatusGet operation in GatewayApi.
+ * @export
+ * @interface GatewayApiGatewayUsersUsernameStatusGetRequest
+ */
+export interface GatewayApiGatewayUsersUsernameStatusGetRequest {
+    /**
+     * Bearer GATEWAY_API_TOKEN
+     * @type {string}
+     * @memberof GatewayApiGatewayUsersUsernameStatusGet
+     */
+    readonly authorization: string
+
+    /**
+     * Ocserv username
+     * @type {string}
+     * @memberof GatewayApiGatewayUsersUsernameStatusGet
+     */
+    readonly username: string
+}
+
+/**
  * GatewayApi - object-oriented interface
  * @export
  * @class GatewayApi
@@ -162,6 +249,18 @@ export class GatewayApi extends BaseAPI {
      */
     public gatewayUsersPost(requestParameters: GatewayApiGatewayUsersPostRequest, options?: RawAxiosRequestConfig) {
         return GatewayApiFp(this.configuration).gatewayUsersPost(requestParameters.authorization, requestParameters.request, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Returns live status, expiry, traffic limit, consumed traffic, and remaining traffic for a gateway-created user.
+     * @summary Gateway ocserv user status
+     * @param {GatewayApiGatewayUsersUsernameStatusGetRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GatewayApi
+     */
+    public gatewayUsersUsernameStatusGet(requestParameters: GatewayApiGatewayUsersUsernameStatusGetRequest, options?: RawAxiosRequestConfig) {
+        return GatewayApiFp(this.configuration).gatewayUsersUsernameStatusGet(requestParameters.authorization, requestParameters.username, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

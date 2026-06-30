@@ -6,6 +6,7 @@ export * from './customer-summary-response';
 export * from './customer-usage-response';
 export * from './gateway-create-user-data';
 export * from './gateway-create-user-response';
+export * from './gateway-user-status-response';
 export * from './group-unsynced-group';
 export * from './home-cpu';
 export * from './home-current-stats';

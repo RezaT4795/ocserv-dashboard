@@ -1,6 +1,7 @@
 package gateway
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -143,6 +144,104 @@ func (ctl *Controller) UserStatus(c echo.Context) error {
 		return ctl.request.BadRequest(c, err)
 	}
 
+	response, err := ctl.buildUserStatusResponse(ctx, user)
+	if err != nil {
+		return ctl.request.BadRequest(c, err)
+	}
+
+	return c.JSON(http.StatusOK, response)
+}
+
+// UpdateUserSubscription updates traffic, expiry, and activation state for an existing gateway user.
+//
+// @Summary      Gateway ocserv user subscription update
+// @Description  Updates traffic limit, expiry date, traffic usage reset, and activation state for a gateway-created user.
+// @Tags         Gateway
+// @Accept       json
+// @Produce      json
+// @Param        Authorization header string true "Bearer GATEWAY_API_TOKEN"
+// @Param        username path string true "Ocserv username"
+// @Param        request body UpdateUserSubscriptionData true "gateway user subscription update data"
+// @Failure      400 {object} request.ErrorResponse
+// @Failure      401 {object} middlewares.Unauthorized
+// @Failure      404 {object} request.ErrorResponse
+// @Success      200 {object} UserStatusResponse
+// @Router       /gateway/users/{username}/subscription [patch]
+func (ctl *Controller) UpdateUserSubscription(c echo.Context) error {
+	username := strings.TrimSpace(c.Param("username"))
+	if username == "" {
+		return ctl.request.BadRequest(c, errors.New("username is required"))
+	}
+
+	var data UpdateUserSubscriptionData
+	if err := ctl.request.DoValidate(c, &data); err != nil {
+		return ctl.request.BadRequest(c, err)
+	}
+
+	update := repository.GatewaySubscriptionUpdate{
+		ResetTraffic: data.ResetTrafficUsage,
+		Activate:     data.Activate,
+	}
+
+	if data.TrafficLimitGB != nil {
+		trafficSize := int64(*data.TrafficLimitGB) * bytesInGiB
+		update.TrafficSize = &trafficSize
+	}
+
+	if data.Unlimited {
+		update.SetExpireAt = true
+		update.ExpireAt = nil
+	} else if data.ExpireAt != nil {
+		expireAtText := strings.TrimSpace(*data.ExpireAt)
+		if expireAtText == "" {
+			return ctl.request.BadRequest(c, errors.New("expire_at cannot be empty"))
+		}
+
+		expireAt, err := time.Parse("2006-01-02", expireAtText)
+		if err != nil {
+			return ctl.request.BadRequest(c, errors.New("expire_at must use YYYY-MM-DD format"))
+		}
+
+		update.SetExpireAt = true
+		update.ExpireAt = &expireAt
+	}
+
+	if update.TrafficSize == nil &&
+		!update.SetExpireAt &&
+		!update.ResetTraffic &&
+		!update.Activate {
+		return ctl.request.BadRequest(c, errors.New("at least one subscription field is required"))
+	}
+
+	ctx := c.Request().Context()
+
+	user, err := ctl.ocservUserRepo.UpdateGatewaySubscription(
+		ctx,
+		username,
+		update)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.JSON(http.StatusNotFound, request.ErrorResponse{
+				Error:   []string{"user not found"},
+				Message: []string{},
+			})
+		}
+
+		return ctl.request.BadRequest(c, err)
+	}
+
+	response, err := ctl.buildUserStatusResponse(ctx, user)
+	if err != nil {
+		return ctl.request.BadRequest(c, err)
+	}
+
+	return c.JSON(http.StatusOK, response)
+}
+
+func (ctl *Controller) buildUserStatusResponse(
+	ctx context.Context,
+	user *models.OcservUser,
+) (UserStatusResponse, error) {
 	rxBytes := int64(user.Rx)
 	txBytes := int64(user.Tx)
 
@@ -153,7 +252,7 @@ func (ctl *Controller) UserStatus(c echo.Context) error {
 			user.UsageResetAt,
 		)
 		if err != nil {
-			return ctl.request.BadRequest(c, err)
+			return UserStatusResponse{}, err
 		}
 
 		rxBytes = currentCycleTraffic.RX
@@ -167,7 +266,7 @@ func (ctl *Controller) UserStatus(c echo.Context) error {
 		remainingBytes = 0
 	}
 
-	return c.JSON(http.StatusOK, UserStatusResponse{
+	return UserStatusResponse{
 		RemoteUserID:          user.UID,
 		Username:              user.Username,
 		Group:                 user.Group,
@@ -188,7 +287,7 @@ func (ctl *Controller) UserStatus(c echo.Context) error {
 		TrafficRemainingBytes: remainingBytes,
 		RxBytes:               rxBytes,
 		TxBytes:               txBytes,
-	})
+	}, nil
 }
 
 func isMonthlyTrafficType(trafficType string) bool {

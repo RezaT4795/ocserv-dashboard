@@ -44,3 +44,11 @@ type UserStatusResponse struct {
 	RxBytes               int64   `json:"rx_bytes"`
 	TxBytes               int64   `json:"tx_bytes"`
 }
+
+type UpdateUserSubscriptionData struct {
+	TrafficLimitGB    *int    `json:"traffic_limit_gb" validate:"omitempty,min=1,max=100000"`
+	ExpireAt          *string `json:"expire_at" validate:"omitempty" example:"2026-12-31"`
+	Unlimited         bool    `json:"unlimited" validate:"omitempty"`
+	ResetTrafficUsage bool    `json:"reset_traffic_usage" validate:"omitempty"`
+	Activate          bool    `json:"activate" validate:"omitempty"`
+}

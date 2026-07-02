@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -47,6 +48,7 @@ type OcservUserCRUD interface {
 	GetByUID(ctx context.Context, uid string) (*models.OcservUser, error)
 	GetByUsername(ctx context.Context, username string) (*models.OcservUser, error)
 	Update(ctx context.Context, ocservUser *models.OcservUser) (*models.OcservUser, error)
+	UpdateGatewaySubscription(ctx context.Context, username string, update GatewaySubscriptionUpdate) (*models.OcservUser, error)
 	Delete(ctx context.Context, uid string) (string, error)
 }
 
@@ -82,6 +84,14 @@ type OcservUserRepositoryInterface interface {
 	OcservUserPassword
 	OcservUserGroup
 	OcservUserActions
+}
+
+type GatewaySubscriptionUpdate struct {
+	TrafficSize  *int64
+	SetExpireAt  bool
+	ExpireAt     *time.Time
+	ResetTraffic bool
+	Activate     bool
 }
 
 func NewtOcservUserRepository() *OcservUserRepository {
@@ -272,6 +282,84 @@ func (o *OcservUserRepository) Update(ctx context.Context, ocservUser *models.Oc
 		_, _ = o.commonOcservOcctlRepo.ReloadConfigs()
 	}()
 	return ocservUser, nil
+}
+
+func (o *OcservUserRepository) UpdateGatewaySubscription(
+	ctx context.Context,
+	username string,
+	update GatewaySubscriptionUpdate,
+) (*models.OcservUser, error) {
+	var updatedUser models.OcservUser
+
+	err := o.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var ocservUser models.OcservUser
+
+		if err := tx.
+			Where("username = ?", username).
+			First(&ocservUser).Error; err != nil {
+			return err
+		}
+
+		updates := map[string]interface{}{}
+
+		if update.TrafficSize != nil {
+			updates["traffic_size"] = *update.TrafficSize
+		}
+
+		if update.SetExpireAt {
+			updates["expire_at"] = update.ExpireAt
+		}
+
+		if update.ResetTraffic {
+			now := time.Now()
+			updates["rx"] = 0
+			updates["tx"] = 0
+			updates["usage_reset_at"] = &now
+		}
+
+		if update.Activate {
+			updates["deactivated_at"] = nil
+			updates["is_locked"] = false
+		}
+
+		if len(updates) == 0 {
+			return errors.New("no subscription fields were provided")
+		}
+
+		if err := tx.
+			Model(&models.OcservUser{}).
+			Where("username = ?", username).
+			Updates(updates).Error; err != nil {
+			return err
+		}
+
+		if update.Activate {
+			output, err := o.commonOcservUserRepo.UnLock(ocservUser.Username)
+			if err != nil && !isAlreadyUnlockedOcpasswdError(output, err) {
+				return fmt.Errorf("failed to unlock ocserv user %q: %s: %w", ocservUser.Username, strings.TrimSpace(output), err)
+			}
+		}
+
+		if err := tx.
+			Where("username = ?", username).
+			First(&updatedUser).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	go func() {
+		_, _ = o.commonOcservOcctlRepo.ReloadConfigs()
+	}()
+
+	o.applyCertificateStatus(&updatedUser)
+
+	return &updatedUser, nil
 }
 
 func (o *OcservUserRepository) Lock(ctx context.Context, uid string) error {

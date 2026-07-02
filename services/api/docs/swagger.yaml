@@ -180,6 +180,22 @@ definitions:
       username:
         type: string
     type: object
+  gateway.UpdateUserSubscriptionData:
+    properties:
+      activate:
+        type: boolean
+      expire_at:
+        example: "2026-12-31"
+        type: string
+      reset_traffic_usage:
+        type: boolean
+      traffic_limit_gb:
+        maximum: 100000
+        minimum: 1
+        type: integer
+      unlimited:
+        type: boolean
+    type: object
   gateway.UserStatusResponse:
     properties:
       active:
@@ -1743,6 +1759,51 @@ paths:
           schema:
             $ref: '#/definitions/request.ErrorResponse'
       summary: Gateway ocserv user status
+      tags:
+      - Gateway
+  /gateway/users/{username}/subscription:
+    patch:
+      consumes:
+      - application/json
+      description: Updates traffic limit, expiry date, traffic usage reset, and activation
+        state for a gateway-created user.
+      parameters:
+      - description: Bearer GATEWAY_API_TOKEN
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Ocserv username
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: gateway user subscription update data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/gateway.UpdateUserSubscriptionData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/gateway.UserStatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/request.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/middlewares.Unauthorized'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/request.ErrorResponse'
+      summary: Gateway ocserv user subscription update
       tags:
       - Gateway
   /home:

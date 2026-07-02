@@ -553,6 +553,72 @@ const docTemplate = `{
                 }
             }
         },
+        "/gateway/users/{username}/subscription": {
+            "patch": {
+                "description": "Updates traffic limit, expiry date, traffic usage reset, and activation state for a gateway-created user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Gateway"
+                ],
+                "summary": "Gateway ocserv user subscription update",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer GATEWAY_API_TOKEN",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Ocserv username",
+                        "name": "username",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "gateway user subscription update data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/gateway.UpdateUserSubscriptionData"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/gateway.UserStatusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/request.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/middlewares.Unauthorized"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/request.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/home": {
             "get": {
                 "description": "Content of home",
@@ -3754,6 +3820,29 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "gateway.UpdateUserSubscriptionData": {
+            "type": "object",
+            "properties": {
+                "activate": {
+                    "type": "boolean"
+                },
+                "expire_at": {
+                    "type": "string",
+                    "example": "2026-12-31"
+                },
+                "reset_traffic_usage": {
+                    "type": "boolean"
+                },
+                "traffic_limit_gb": {
+                    "type": "integer",
+                    "maximum": 100000,
+                    "minimum": 1
+                },
+                "unlimited": {
+                    "type": "boolean"
                 }
             }
         },

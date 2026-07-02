@@ -180,6 +180,15 @@ definitions:
       username:
         type: string
     type: object
+  gateway.DeleteUserResponse:
+    properties:
+      deleted:
+        type: boolean
+      remote_user_id:
+        type: string
+      username:
+        type: string
+    type: object
   gateway.UpdateUserSubscriptionData:
     properties:
       activate:
@@ -1720,6 +1729,44 @@ paths:
           schema:
             $ref: '#/definitions/middlewares.Unauthorized'
       summary: Gateway ocserv user creation
+      tags:
+      - Gateway
+  /gateway/users/{username}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes an existing ocserv user for an authenticated external gateway.
+      parameters:
+      - description: Bearer GATEWAY_API_TOKEN
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Ocserv username
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/gateway.DeleteUserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/request.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/middlewares.Unauthorized'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/request.ErrorResponse'
+      summary: Gateway ocserv user deletion
       tags:
       - Gateway
   /gateway/users/{username}/status:

@@ -496,6 +496,63 @@ const docTemplate = `{
                 }
             }
         },
+        "/gateway/users/{username}": {
+            "delete": {
+                "description": "Deletes an existing ocserv user for an authenticated external gateway.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Gateway"
+                ],
+                "summary": "Gateway ocserv user deletion",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer GATEWAY_API_TOKEN",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Ocserv username",
+                        "name": "username",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/gateway.DeleteUserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/request.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/middlewares.Unauthorized"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/request.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/gateway/users/{username}/status": {
             "get": {
                 "description": "Returns live status, expiry, traffic limit, consumed traffic, and remaining traffic for a gateway-created user.",
@@ -3817,6 +3874,20 @@ const docTemplate = `{
                 },
                 "unlimited": {
                     "type": "boolean"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "gateway.DeleteUserResponse": {
+            "type": "object",
+            "properties": {
+                "deleted": {
+                    "type": "boolean"
+                },
+                "remote_user_id": {
+                    "type": "string"
                 },
                 "username": {
                     "type": "string"

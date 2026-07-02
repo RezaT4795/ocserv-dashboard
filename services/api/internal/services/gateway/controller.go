@@ -238,6 +238,52 @@ func (ctl *Controller) UpdateUserSubscription(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
+// DeleteUser deletes an existing gateway-created ocserv user.
+//
+// @Summary      Gateway ocserv user deletion
+// @Description  Deletes an existing ocserv user for an authenticated external gateway.
+// @Tags         Gateway
+// @Accept       json
+// @Produce      json
+// @Param        Authorization header string true "Bearer GATEWAY_API_TOKEN"
+// @Param        username path string true "Ocserv username"
+// @Failure      400 {object} request.ErrorResponse
+// @Failure      401 {object} middlewares.Unauthorized
+// @Failure      404 {object} request.ErrorResponse
+// @Success      200 {object} DeleteUserResponse
+// @Router       /gateway/users/{username} [delete]
+func (ctl *Controller) DeleteUser(c echo.Context) error {
+	username := strings.TrimSpace(c.Param("username"))
+	if username == "" {
+		return ctl.request.BadRequest(c, errors.New("username is required"))
+	}
+
+	ctx := c.Request().Context()
+
+	user, err := ctl.ocservUserRepo.GetByUsername(ctx, username)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.JSON(http.StatusNotFound, request.ErrorResponse{
+				Error:   []string{"user not found"},
+				Message: []string{},
+			})
+		}
+
+		return ctl.request.BadRequest(c, err)
+	}
+
+	_, err = ctl.ocservUserRepo.Delete(ctx, user.UID)
+	if err != nil {
+		return ctl.request.BadRequest(c, fmt.Errorf("failed to delete ocserv user: %w", err))
+	}
+
+	return c.JSON(http.StatusOK, DeleteUserResponse{
+		RemoteUserID: user.UID,
+		Username:     user.Username,
+		Deleted:      true,
+	})
+}
+
 func (ctl *Controller) buildUserStatusResponse(
 	ctx context.Context,
 	user *models.OcservUser,

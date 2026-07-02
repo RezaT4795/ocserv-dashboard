@@ -52,3 +52,9 @@ type UpdateUserSubscriptionData struct {
 	ResetTrafficUsage bool    `json:"reset_traffic_usage" validate:"omitempty"`
 	Activate          bool    `json:"activate" validate:"omitempty"`
 }
+
+type DeleteUserResponse struct {
+	RemoteUserID string `json:"remote_user_id"`
+	Username     string `json:"username"`
+	Deleted      bool   `json:"deleted"`
+}

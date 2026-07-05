@@ -92,6 +92,7 @@ type GatewaySubscriptionUpdate struct {
 	ExpireAt     *time.Time
 	ResetTraffic bool
 	Activate     bool
+	Group        *string
 }
 
 func NewtOcservUserRepository() *OcservUserRepository {
@@ -322,6 +323,16 @@ func (o *OcservUserRepository) UpdateGatewaySubscription(
 			updates["is_locked"] = false
 		}
 
+		if update.Group != nil {
+			group := strings.TrimSpace(*update.Group)
+			if group == "" {
+				return errors.New("group cannot be empty")
+			}
+
+			updates["group"] = group
+			ocservUser.Group = group
+		}
+
 		if len(updates) == 0 {
 			return errors.New("no subscription fields were provided")
 		}
@@ -331,6 +342,16 @@ func (o *OcservUserRepository) UpdateGatewaySubscription(
 			Where("username = ?", username).
 			Updates(updates).Error; err != nil {
 			return err
+		}
+
+		if update.Group != nil {
+			if err := o.commonOcservUserRepo.Create(
+				ocservUser.Group,
+				ocservUser.Username,
+				ocservUser.Password,
+				ocservUser.Config); err != nil {
+				return fmt.Errorf("failed to update ocserv user group %q: %w", ocservUser.Username, err)
+			}
 		}
 
 		if update.Activate {

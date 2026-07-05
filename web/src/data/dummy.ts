@@ -219,82 +219,81 @@ const dummyHomeDockerService: HomeDockerService = {
     }
 };
 
-
 const dummyRepositoryTotalBandwidths: RepositoryTotalBandwidths = {
     rx: 1250000000,
     tx: 875000000
 };
 
-const dummyRepositoryTopBandwidthUsers: RepositoryTopBandwidthUsers =     {
-        top_rx: [
-            {
-                uid: 'u1',
-                username: 'alice',
-                password: 'pass123',
-                group: 'premium',
-                owner: 'system',
-                is_locked: false,
-                is_online: true,
-                rx: 5200000000,
-                tx: 1200000000,
-                traffic_size: 10000000000,
-                traffic_type: 'monthly' as ModelsOcservUserTrafficTypeEnum,
-                created_at: '2026-01-10T10:00:00Z',
-                updated_at: '2026-06-01T12:00:00Z',
-                certificate_available: true,
-                certificate_enabled: true,
-                online_sessions: []
-            },
-            {
-                uid: 'u2',
-                username: 'bob',
-                password: 'pass123',
-                group: 'basic',
-                owner: 'system',
-                is_locked: false,
-                is_online: false,
-                rx: 3100000000,
-                tx: 900000000,
-                traffic_size: 8000000000,
-                traffic_type: 'monthly' as ModelsOcservUserTrafficTypeEnum,
-                created_at: '2026-02-15T09:00:00Z',
-                online_sessions: []
-            }
-        ],
-        top_tx: [
-            {
-                uid: 'u3',
-                username: 'charlie',
-                password: 'pass123',
-                group: 'premium',
-                owner: 'system',
-                is_locked: false,
-                is_online: true,
-                rx: 2000000000,
-                tx: 7800000000,
-                traffic_size: 12000000000,
-                traffic_type: 'monthly' as ModelsOcservUserTrafficTypeEnum,
-                created_at: '2026-03-01T08:00:00Z',
-                certificate_available: true,
-                certificate_enabled: true,
-                online_sessions: []
-            },
-            {
-                uid: 'u4',
-                username: 'david',
-                password: 'pass123',
-                group: 'basic',
-                owner: 'system',
-                is_locked: false,
-                is_online: true,
-                rx: 1500000000,
-                tx: 5400000000,
-                traffic_size: 9000000000,
-                traffic_type: 'monthly' as ModelsOcservUserTrafficTypeEnum,
-                created_at: '2026-04-20T11:30:00Z',
-                online_sessions: []
-            }
-        ]
+const dummyRepositoryTopBandwidthUsers: RepositoryTopBandwidthUsers = {
+    top_rx: [
+        {
+            uid: 'u1',
+            username: 'alice',
+            password: 'pass123',
+            group: 'premium',
+            owner: 'system',
+            is_locked: false,
+            is_online: true,
+            rx: 5200000000,
+            tx: 1200000000,
+            traffic_size: 10000000000,
+            traffic_type: 'monthly' as ModelsOcservUserTrafficTypeEnum,
+            created_at: '2026-01-10T10:00:00Z',
+            updated_at: '2026-06-01T12:00:00Z',
+            certificate_available: true,
+            certificate_enabled: true,
+            online_sessions: []
+        },
+        {
+            uid: 'u2',
+            username: 'bob',
+            password: 'pass123',
+            group: 'basic',
+            owner: 'system',
+            is_locked: false,
+            is_online: false,
+            rx: 3100000000,
+            tx: 900000000,
+            traffic_size: 8000000000,
+            traffic_type: 'monthly' as ModelsOcservUserTrafficTypeEnum,
+            created_at: '2026-02-15T09:00:00Z',
+            online_sessions: []
+        }
+    ],
+    top_tx: [
+        {
+            uid: 'u3',
+            username: 'charlie',
+            password: 'pass123',
+            group: 'premium',
+            owner: 'system',
+            is_locked: false,
+            is_online: true,
+            rx: 2000000000,
+            tx: 7800000000,
+            traffic_size: 12000000000,
+            traffic_type: 'monthly' as ModelsOcservUserTrafficTypeEnum,
+            created_at: '2026-03-01T08:00:00Z',
+            certificate_available: true,
+            certificate_enabled: true,
+            online_sessions: []
+        },
+        {
+            uid: 'u4',
+            username: 'david',
+            password: 'pass123',
+            group: 'basic',
+            owner: 'system',
+            is_locked: false,
+            is_online: true,
+            rx: 1500000000,
+            tx: 5400000000,
+            traffic_size: 9000000000,
+            traffic_type: 'monthly' as ModelsOcservUserTrafficTypeEnum,
+            created_at: '2026-04-20T11:30:00Z',
+            online_sessions: []
+        }
+    ]
 };
 
 const dummyHomeGetHomeUser: HomeGetHomeUser = {

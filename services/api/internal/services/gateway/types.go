@@ -51,6 +51,7 @@ type UpdateUserSubscriptionData struct {
 	Unlimited         bool    `json:"unlimited" validate:"omitempty"`
 	ResetTrafficUsage bool    `json:"reset_traffic_usage" validate:"omitempty"`
 	Activate          bool    `json:"activate" validate:"omitempty"`
+	Group             *string `json:"group" validate:"omitempty,min=1,max=16"`
 }
 
 type DeleteUserResponse struct {

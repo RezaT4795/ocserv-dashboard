@@ -196,6 +196,10 @@ definitions:
       expire_at:
         example: "2026-12-31"
         type: string
+      group:
+        maxLength: 16
+        minLength: 1
+        type: string
       reset_traffic_usage:
         type: boolean
       traffic_limit_gb:
@@ -1812,8 +1816,8 @@ paths:
     patch:
       consumes:
       - application/json
-      description: Updates traffic limit, expiry date, traffic usage reset, and activation
-        state for a gateway-created user.
+      description: Updates traffic limit, expiry date, traffic usage reset, activation
+        state, and group for a gateway-created user.
       parameters:
       - description: Bearer GATEWAY_API_TOKEN
         in: header

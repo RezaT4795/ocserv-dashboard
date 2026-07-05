@@ -26,6 +26,10 @@ import type { GatewayCreateUserData } from '../models';
 // @ts-ignore
 import type { GatewayCreateUserResponse } from '../models';
 // @ts-ignore
+import type { GatewayDeleteUserResponse } from '../models';
+// @ts-ignore
+import type { GatewayUpdateUserSubscriptionData } from '../models';
+// @ts-ignore
 import type { GatewayUserStatusResponse } from '../models';
 // @ts-ignore
 import type { MiddlewaresUnauthorized } from '../models';
@@ -80,6 +84,46 @@ export const GatewayApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
+         * Deletes an existing ocserv user for an authenticated external gateway.
+         * @summary Gateway ocserv user deletion
+         * @param {string} authorization Bearer GATEWAY_API_TOKEN
+         * @param {string} username Ocserv username
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        gatewayUsersUsernameDelete: async (authorization: string, username: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'authorization' is not null or undefined
+            assertParamExists('gatewayUsersUsernameDelete', 'authorization', authorization)
+            // verify required parameter 'username' is not null or undefined
+            assertParamExists('gatewayUsersUsernameDelete', 'username', username)
+            const localVarPath = `/gateway/users/{username}`
+                .replace(`{${"username"}}`, encodeURIComponent(String(username)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            if (authorization != null) {
+                localVarHeaderParameter['Authorization'] = String(authorization);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Returns live status, expiry, traffic limit, consumed traffic, and remaining traffic for a gateway-created user.
          * @summary Gateway ocserv user status
          * @param {string} authorization Bearer GATEWAY_API_TOKEN
@@ -119,6 +163,52 @@ export const GatewayApiAxiosParamCreator = function (configuration?: Configurati
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * Updates traffic limit, expiry date, traffic usage reset, activation state, and group for a gateway-created user.
+         * @summary Gateway ocserv user subscription update
+         * @param {string} authorization Bearer GATEWAY_API_TOKEN
+         * @param {string} username Ocserv username
+         * @param {GatewayUpdateUserSubscriptionData} request gateway user subscription update data
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        gatewayUsersUsernameSubscriptionPatch: async (authorization: string, username: string, request: GatewayUpdateUserSubscriptionData, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'authorization' is not null or undefined
+            assertParamExists('gatewayUsersUsernameSubscriptionPatch', 'authorization', authorization)
+            // verify required parameter 'username' is not null or undefined
+            assertParamExists('gatewayUsersUsernameSubscriptionPatch', 'username', username)
+            // verify required parameter 'request' is not null or undefined
+            assertParamExists('gatewayUsersUsernameSubscriptionPatch', 'request', request)
+            const localVarPath = `/gateway/users/{username}/subscription`
+                .replace(`{${"username"}}`, encodeURIComponent(String(username)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            if (authorization != null) {
+                localVarHeaderParameter['Authorization'] = String(authorization);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(request, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -144,6 +234,20 @@ export const GatewayApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Deletes an existing ocserv user for an authenticated external gateway.
+         * @summary Gateway ocserv user deletion
+         * @param {string} authorization Bearer GATEWAY_API_TOKEN
+         * @param {string} username Ocserv username
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async gatewayUsersUsernameDelete(authorization: string, username: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GatewayDeleteUserResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.gatewayUsersUsernameDelete(authorization, username, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['GatewayApi.gatewayUsersUsernameDelete']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Returns live status, expiry, traffic limit, consumed traffic, and remaining traffic for a gateway-created user.
          * @summary Gateway ocserv user status
          * @param {string} authorization Bearer GATEWAY_API_TOKEN
@@ -155,6 +259,21 @@ export const GatewayApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.gatewayUsersUsernameStatusGet(authorization, username, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['GatewayApi.gatewayUsersUsernameStatusGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Updates traffic limit, expiry date, traffic usage reset, activation state, and group for a gateway-created user.
+         * @summary Gateway ocserv user subscription update
+         * @param {string} authorization Bearer GATEWAY_API_TOKEN
+         * @param {string} username Ocserv username
+         * @param {GatewayUpdateUserSubscriptionData} request gateway user subscription update data
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async gatewayUsersUsernameSubscriptionPatch(authorization: string, username: string, request: GatewayUpdateUserSubscriptionData, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GatewayUserStatusResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.gatewayUsersUsernameSubscriptionPatch(authorization, username, request, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['GatewayApi.gatewayUsersUsernameSubscriptionPatch']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
     }
@@ -178,6 +297,16 @@ export const GatewayApiFactory = function (configuration?: Configuration, basePa
             return localVarFp.gatewayUsersPost(requestParameters.authorization, requestParameters.request, options).then((request) => request(axios, basePath));
         },
         /**
+         * Deletes an existing ocserv user for an authenticated external gateway.
+         * @summary Gateway ocserv user deletion
+         * @param {GatewayApiGatewayUsersUsernameDeleteRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        gatewayUsersUsernameDelete(requestParameters: GatewayApiGatewayUsersUsernameDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<GatewayDeleteUserResponse> {
+            return localVarFp.gatewayUsersUsernameDelete(requestParameters.authorization, requestParameters.username, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Returns live status, expiry, traffic limit, consumed traffic, and remaining traffic for a gateway-created user.
          * @summary Gateway ocserv user status
          * @param {GatewayApiGatewayUsersUsernameStatusGetRequest} requestParameters Request parameters.
@@ -186,6 +315,16 @@ export const GatewayApiFactory = function (configuration?: Configuration, basePa
          */
         gatewayUsersUsernameStatusGet(requestParameters: GatewayApiGatewayUsersUsernameStatusGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<GatewayUserStatusResponse> {
             return localVarFp.gatewayUsersUsernameStatusGet(requestParameters.authorization, requestParameters.username, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Updates traffic limit, expiry date, traffic usage reset, activation state, and group for a gateway-created user.
+         * @summary Gateway ocserv user subscription update
+         * @param {GatewayApiGatewayUsersUsernameSubscriptionPatchRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        gatewayUsersUsernameSubscriptionPatch(requestParameters: GatewayApiGatewayUsersUsernameSubscriptionPatchRequest, options?: RawAxiosRequestConfig): AxiosPromise<GatewayUserStatusResponse> {
+            return localVarFp.gatewayUsersUsernameSubscriptionPatch(requestParameters.authorization, requestParameters.username, requestParameters.request, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -212,6 +351,27 @@ export interface GatewayApiGatewayUsersPostRequest {
 }
 
 /**
+ * Request parameters for gatewayUsersUsernameDelete operation in GatewayApi.
+ * @export
+ * @interface GatewayApiGatewayUsersUsernameDeleteRequest
+ */
+export interface GatewayApiGatewayUsersUsernameDeleteRequest {
+    /**
+     * Bearer GATEWAY_API_TOKEN
+     * @type {string}
+     * @memberof GatewayApiGatewayUsersUsernameDelete
+     */
+    readonly authorization: string
+
+    /**
+     * Ocserv username
+     * @type {string}
+     * @memberof GatewayApiGatewayUsersUsernameDelete
+     */
+    readonly username: string
+}
+
+/**
  * Request parameters for gatewayUsersUsernameStatusGet operation in GatewayApi.
  * @export
  * @interface GatewayApiGatewayUsersUsernameStatusGetRequest
@@ -230,6 +390,34 @@ export interface GatewayApiGatewayUsersUsernameStatusGetRequest {
      * @memberof GatewayApiGatewayUsersUsernameStatusGet
      */
     readonly username: string
+}
+
+/**
+ * Request parameters for gatewayUsersUsernameSubscriptionPatch operation in GatewayApi.
+ * @export
+ * @interface GatewayApiGatewayUsersUsernameSubscriptionPatchRequest
+ */
+export interface GatewayApiGatewayUsersUsernameSubscriptionPatchRequest {
+    /**
+     * Bearer GATEWAY_API_TOKEN
+     * @type {string}
+     * @memberof GatewayApiGatewayUsersUsernameSubscriptionPatch
+     */
+    readonly authorization: string
+
+    /**
+     * Ocserv username
+     * @type {string}
+     * @memberof GatewayApiGatewayUsersUsernameSubscriptionPatch
+     */
+    readonly username: string
+
+    /**
+     * gateway user subscription update data
+     * @type {GatewayUpdateUserSubscriptionData}
+     * @memberof GatewayApiGatewayUsersUsernameSubscriptionPatch
+     */
+    readonly request: GatewayUpdateUserSubscriptionData
 }
 
 /**
@@ -252,6 +440,18 @@ export class GatewayApi extends BaseAPI {
     }
 
     /**
+     * Deletes an existing ocserv user for an authenticated external gateway.
+     * @summary Gateway ocserv user deletion
+     * @param {GatewayApiGatewayUsersUsernameDeleteRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GatewayApi
+     */
+    public gatewayUsersUsernameDelete(requestParameters: GatewayApiGatewayUsersUsernameDeleteRequest, options?: RawAxiosRequestConfig) {
+        return GatewayApiFp(this.configuration).gatewayUsersUsernameDelete(requestParameters.authorization, requestParameters.username, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
      * Returns live status, expiry, traffic limit, consumed traffic, and remaining traffic for a gateway-created user.
      * @summary Gateway ocserv user status
      * @param {GatewayApiGatewayUsersUsernameStatusGetRequest} requestParameters Request parameters.
@@ -261,6 +461,18 @@ export class GatewayApi extends BaseAPI {
      */
     public gatewayUsersUsernameStatusGet(requestParameters: GatewayApiGatewayUsersUsernameStatusGetRequest, options?: RawAxiosRequestConfig) {
         return GatewayApiFp(this.configuration).gatewayUsersUsernameStatusGet(requestParameters.authorization, requestParameters.username, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Updates traffic limit, expiry date, traffic usage reset, activation state, and group for a gateway-created user.
+     * @summary Gateway ocserv user subscription update
+     * @param {GatewayApiGatewayUsersUsernameSubscriptionPatchRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GatewayApi
+     */
+    public gatewayUsersUsernameSubscriptionPatch(requestParameters: GatewayApiGatewayUsersUsernameSubscriptionPatchRequest, options?: RawAxiosRequestConfig) {
+        return GatewayApiFp(this.configuration).gatewayUsersUsernameSubscriptionPatch(requestParameters.authorization, requestParameters.username, requestParameters.request, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

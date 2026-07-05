@@ -152,10 +152,10 @@ func (ctl *Controller) UserStatus(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
-// UpdateUserSubscription updates traffic, expiry, and activation state for an existing gateway user.
+// UpdateUserSubscription updates traffic, expiry, activation state, and group for an existing gateway user.
 //
 // @Summary      Gateway ocserv user subscription update
-// @Description  Updates traffic limit, expiry date, traffic usage reset, and activation state for a gateway-created user.
+// @Description  Updates traffic limit, expiry date, traffic usage reset, activation state, and group for a gateway-created user.
 // @Tags         Gateway
 // @Accept       json
 // @Produce      json
@@ -181,6 +181,15 @@ func (ctl *Controller) UpdateUserSubscription(c echo.Context) error {
 	update := repository.GatewaySubscriptionUpdate{
 		ResetTraffic: data.ResetTrafficUsage,
 		Activate:     data.Activate,
+	}
+
+	if data.Group != nil {
+		group := strings.TrimSpace(*data.Group)
+		if group == "" {
+			return ctl.request.BadRequest(c, errors.New("group cannot be empty"))
+		}
+
+		update.Group = &group
 	}
 
 	if data.TrafficLimitGB != nil {
@@ -209,7 +218,8 @@ func (ctl *Controller) UpdateUserSubscription(c echo.Context) error {
 	if update.TrafficSize == nil &&
 		!update.SetExpireAt &&
 		!update.ResetTraffic &&
-		!update.Activate {
+		!update.Activate &&
+		update.Group == nil {
 		return ctl.request.BadRequest(c, errors.New("at least one subscription field is required"))
 	}
 

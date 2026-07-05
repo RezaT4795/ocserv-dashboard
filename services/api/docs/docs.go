@@ -612,7 +612,7 @@ const docTemplate = `{
         },
         "/gateway/users/{username}/subscription": {
             "patch": {
-                "description": "Updates traffic limit, expiry date, traffic usage reset, and activation state for a gateway-created user.",
+                "description": "Updates traffic limit, expiry date, traffic usage reset, activation state, and group for a gateway-created user.",
                 "consumes": [
                     "application/json"
                 ],
@@ -3903,6 +3903,11 @@ const docTemplate = `{
                 "expire_at": {
                     "type": "string",
                     "example": "2026-12-31"
+                },
+                "group": {
+                    "type": "string",
+                    "maxLength": 16,
+                    "minLength": 1
                 },
                 "reset_traffic_usage": {
                     "type": "boolean"

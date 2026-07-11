@@ -3,7 +3,6 @@ package customer
 import (
 	"errors"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -57,7 +56,7 @@ func (ctl *Controller) CiscoSetup(c echo.Context) error {
 		ConnectionName:      systemConfig.ClientProfileConnectionName,
 		ServerAddress:       systemConfig.ClientProfileServerAddress,
 		ServerPort:          systemConfig.ClientProfileServerPort,
-		PublicAPIBaseURL:    publicAPIBaseURL(c),
+		PublicAPIBaseURL:    ciscoSetup.PublicAPIBaseURL(c.Request()),
 		SecretKey:           config.Get().SecretKey,
 		Now:                 time.Now(),
 	})
@@ -139,27 +138,4 @@ func (ctl *Controller) DownloadCiscoSetupCertificate(c echo.Context) error {
 	c.Response().Header().Set("X-Content-Type-Options", "nosniff")
 
 	return c.Attachment(path, user.Username+".p12")
-}
-
-func publicAPIBaseURL(c echo.Context) string {
-	req := c.Request()
-
-	scheme := strings.TrimSpace(req.Header.Get("X-Forwarded-Proto"))
-	if scheme == "" {
-		scheme = strings.TrimSpace(req.URL.Scheme)
-	}
-	if scheme == "" {
-		if req.TLS != nil {
-			scheme = "https"
-		} else {
-			scheme = "http"
-		}
-	}
-
-	host := strings.TrimSpace(req.Header.Get("X-Forwarded-Host"))
-	if host == "" {
-		host = strings.TrimSpace(req.Host)
-	}
-
-	return scheme + "://" + host
 }

@@ -3,17 +3,13 @@ package customer
 import (
 	"errors"
 	"net/http"
-	"net/url"
 	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
 	ciscoSetup "github.com/mmtaee/ocserv-dashboard/api/internal/services/cisco"
-	ocservUser "github.com/mmtaee/ocserv-dashboard/common/ocserv/user"
 	"github.com/mmtaee/ocserv-dashboard/common/pkg/config"
 )
-
-const ciscoSetupCertificateTokenTTL = 10 * time.Minute
 
 // CiscoSetup creates Cisco Secure Client setup URIs for the customer.
 //
@@ -38,7 +34,10 @@ func (ctl *Controller) CiscoSetup(c echo.Context) error {
 		return ctl.request.BadRequest(c, errors.New("invalid username or password"))
 	}
 
-	user, err := ctl.ocservUserRepo.GetByUsername(c.Request().Context(), data.Username)
+	user, err := ctl.ocservUserRepo.GetByUsername(
+		c.Request().Context(),
+		data.Username,
+	)
 	if err != nil {
 		return ctl.request.BadRequest(c, err)
 	}
@@ -52,51 +51,28 @@ func (ctl *Controller) CiscoSetup(c echo.Context) error {
 		return ctl.request.BadRequest(c, err)
 	}
 
-	connectionName, err := ocservUser.NormalizeProfileConnectionName(systemConfig.ClientProfileConnectionName)
-	if err != nil {
-		return ctl.request.BadRequest(c, err)
-	}
-
-	serverAddress, err := ocservUser.NormalizeProfileServerAddress(systemConfig.ClientProfileServerAddress)
-	if err != nil {
-		return ctl.request.BadRequest(c, err)
-	}
-
-	serverPort, err := ocservUser.NormalizeProfileServerPort(systemConfig.ClientProfileServerPort)
-	if err != nil {
-		return ctl.request.BadRequest(c, err)
-	}
-
-	expiresAt := time.Now().Add(ciscoSetupCertificateTokenTTL)
-	token, err := ciscoSetup.CreateCertificateToken(
-		user.Username,
-		expiresAt,
-		config.Get().SecretKey,
-	)
-	if err != nil {
-		return ctl.request.BadRequest(c, err)
-	}
-
-	certificateURL := publicAPIBaseURL(c) + "/api/customers/setup/cisco/certificate/" + url.PathEscape(token)
-
-	certificateImportURI, err := ocservUser.BuildAnyConnectImportURI(certificateURL)
-	if err != nil {
-		return ctl.request.BadRequest(c, err)
-	}
-
-	connectionCreateURI, err := ocservUser.BuildAnyConnectCreateURI(connectionName, serverAddress, serverPort, user.Username)
+	setup, err := ciscoSetup.BuildSetup(ciscoSetup.SetupInput{
+		Username:            user.Username,
+		CertificatePassword: user.Password,
+		ConnectionName:      systemConfig.ClientProfileConnectionName,
+		ServerAddress:       systemConfig.ClientProfileServerAddress,
+		ServerPort:          systemConfig.ClientProfileServerPort,
+		PublicAPIBaseURL:    publicAPIBaseURL(c),
+		SecretKey:           config.Get().SecretKey,
+		Now:                 time.Now(),
+	})
 	if err != nil {
 		return ctl.request.BadRequest(c, err)
 	}
 
 	return c.JSON(http.StatusOK, CiscoSetupResponse{
-		CertificateImportURI: certificateImportURI,
-		ConnectionCreateURI:  connectionCreateURI,
-		CertificatePassword:  user.Password,
-		ConnectionName:       connectionName,
-		ServerAddress:        serverAddress,
-		ServerPort:           serverPort,
-		ExpiresAt:            expiresAt,
+		CertificateImportURI: setup.CertificateImportURI,
+		ConnectionCreateURI:  setup.ConnectionCreateURI,
+		CertificatePassword:  setup.CertificatePassword,
+		ConnectionName:       setup.ConnectionName,
+		ServerAddress:        setup.ServerAddress,
+		ServerPort:           setup.ServerPort,
+		ExpiresAt:            setup.ExpiresAt,
 	})
 }
 
@@ -133,19 +109,31 @@ func (ctl *Controller) DownloadCiscoSetupCertificate(c echo.Context) error {
 		return ctl.request.BadRequest(c, err)
 	}
 
-	path, err := ctl.ocservUserRepo.CertificatePathByUsername(ctx, user.Username)
+	path, err := ctl.ocservUserRepo.CertificatePathByUsername(
+		ctx,
+		user.Username,
+	)
 	if err != nil {
-		if err := ctl.ocservUserRepo.CreateCertificate(ctx, user.UID); err != nil {
+		if err := ctl.ocservUserRepo.CreateCertificate(
+			ctx,
+			user.UID,
+		); err != nil {
 			return ctl.request.BadRequest(c, err)
 		}
 
-		path, err = ctl.ocservUserRepo.CertificatePathByUsername(ctx, user.Username)
+		path, err = ctl.ocservUserRepo.CertificatePathByUsername(
+			ctx,
+			user.Username,
+		)
 		if err != nil {
 			return ctl.request.BadRequest(c, err)
 		}
 	}
 
-	c.Response().Header().Set(echo.HeaderContentType, "application/x-pkcs12")
+	c.Response().Header().Set(
+		echo.HeaderContentType,
+		"application/x-pkcs12",
+	)
 	c.Response().Header().Set(echo.HeaderCacheControl, "no-store")
 	c.Response().Header().Set("Pragma", "no-cache")
 	c.Response().Header().Set("X-Content-Type-Options", "nosniff")

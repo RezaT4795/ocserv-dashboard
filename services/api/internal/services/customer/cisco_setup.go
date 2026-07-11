@@ -1,18 +1,14 @@
 package customer
 
 import (
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/base64"
 	"errors"
-	"fmt"
 	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
+	ciscoSetup "github.com/mmtaee/ocserv-dashboard/api/internal/services/cisco"
 	ocservUser "github.com/mmtaee/ocserv-dashboard/common/ocserv/user"
 	"github.com/mmtaee/ocserv-dashboard/common/pkg/config"
 )
@@ -72,7 +68,11 @@ func (ctl *Controller) CiscoSetup(c echo.Context) error {
 	}
 
 	expiresAt := time.Now().Add(ciscoSetupCertificateTokenTTL)
-	token, err := createCiscoSetupCertificateToken(user.Username, expiresAt)
+	token, err := ciscoSetup.CreateCertificateToken(
+		user.Username,
+		expiresAt,
+		config.Get().SecretKey,
+	)
 	if err != nil {
 		return ctl.request.BadRequest(c, err)
 	}
@@ -117,7 +117,11 @@ func (ctl *Controller) DownloadCiscoSetupCertificate(c echo.Context) error {
 		return ctl.request.BadRequest(c, errors.New("token is required"))
 	}
 
-	username, err := parseCiscoSetupCertificateToken(token)
+	username, err := ciscoSetup.ParseCertificateToken(
+		token,
+		time.Now(),
+		config.Get().SecretKey,
+	)
 	if err != nil {
 		return ctl.request.BadRequest(c, err)
 	}
@@ -170,80 +174,4 @@ func publicAPIBaseURL(c echo.Context) string {
 	}
 
 	return scheme + "://" + host
-}
-
-func createCiscoSetupCertificateToken(username string, expiresAt time.Time) (string, error) {
-	username = strings.TrimSpace(username)
-	if username == "" {
-		return "", errors.New("username is required")
-	}
-
-	if strings.Contains(username, "|") {
-		return "", errors.New("username contains invalid characters")
-	}
-
-	payload := username + "|" + strconv.FormatInt(expiresAt.Unix(), 10)
-
-	signature, err := signCiscoSetupCertificatePayload(payload)
-	if err != nil {
-		return "", err
-	}
-
-	rawToken := payload + "|" + signature
-
-	return base64.RawURLEncoding.EncodeToString([]byte(rawToken)), nil
-}
-
-func parseCiscoSetupCertificateToken(token string) (string, error) {
-	token = strings.TrimSpace(token)
-	if token == "" {
-		return "", errors.New("token is required")
-	}
-
-	rawToken, err := base64.RawURLEncoding.DecodeString(token)
-	if err != nil {
-		return "", errors.New("invalid token")
-	}
-
-	parts := strings.Split(string(rawToken), "|")
-	if len(parts) != 3 {
-		return "", errors.New("invalid token")
-	}
-
-	username := parts[0]
-	expiresAtUnix, err := strconv.ParseInt(parts[1], 10, 64)
-	if err != nil {
-		return "", errors.New("invalid token expiry")
-	}
-
-	if time.Now().After(time.Unix(expiresAtUnix, 0)) {
-		return "", errors.New("token has expired")
-	}
-
-	payload := username + "|" + parts[1]
-
-	expectedSignature, err := signCiscoSetupCertificatePayload(payload)
-	if err != nil {
-		return "", err
-	}
-
-	if !hmac.Equal([]byte(expectedSignature), []byte(parts[2])) {
-		return "", errors.New("invalid token signature")
-	}
-
-	return username, nil
-}
-
-func signCiscoSetupCertificatePayload(payload string) (string, error) {
-	secretKey := strings.TrimSpace(config.Get().SecretKey)
-	if secretKey == "" {
-		return "", errors.New("secret key is not configured")
-	}
-
-	mac := hmac.New(sha256.New, []byte(secretKey))
-	if _, err := mac.Write([]byte(payload)); err != nil {
-		return "", fmt.Errorf("failed to sign token: %w", err)
-	}
-
-	return base64.RawURLEncoding.EncodeToString(mac.Sum(nil)), nil
 }

@@ -20,12 +20,14 @@ const bytesInGiB int64 = 1024 * 1024 * 1024
 
 type Controller struct {
 	request        request.CustomRequestInterface
+	systemRepo     repository.SystemRepositoryInterface
 	ocservUserRepo repository.OcservUserRepositoryInterface
 }
 
 func New() *Controller {
 	return &Controller{
 		request:        request.NewCustomRequest(),
+		systemRepo:     repository.NewSystemRepository(),
 		ocservUserRepo: repository.NewtOcservUserRepository(),
 	}
 }

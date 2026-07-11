@@ -9,6 +9,7 @@ func Routes(e *echo.Group) {
 
 	g.POST("/users", ctl.CreateUser)
 	g.GET("/users/:username/status", ctl.UserStatus)
+	g.POST("/users/:username/cisco-setup", ctl.CiscoSetup)
 	g.PATCH("/users/:username/subscription", ctl.UpdateUserSubscription)
 	g.DELETE("/users/:username", ctl.DeleteUser)
 }

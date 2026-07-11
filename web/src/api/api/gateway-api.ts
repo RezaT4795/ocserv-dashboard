@@ -22,6 +22,8 @@ import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObj
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
+import type { GatewayCiscoSetupResponse } from '../models';
+// @ts-ignore
 import type { GatewayCreateUserData } from '../models';
 // @ts-ignore
 import type { GatewayCreateUserResponse } from '../models';
@@ -77,6 +79,46 @@ export const GatewayApiAxiosParamCreator = function (configuration?: Configurati
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(request, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Creates Cisco Secure Client certificate import and connection creation URIs for an existing ocserv user.
+         * @summary Gateway Cisco Secure Client setup
+         * @param {string} authorization Bearer GATEWAY_API_TOKEN
+         * @param {string} username Ocserv username
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        gatewayUsersUsernameCiscoSetupPost: async (authorization: string, username: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'authorization' is not null or undefined
+            assertParamExists('gatewayUsersUsernameCiscoSetupPost', 'authorization', authorization)
+            // verify required parameter 'username' is not null or undefined
+            assertParamExists('gatewayUsersUsernameCiscoSetupPost', 'username', username)
+            const localVarPath = `/gateway/users/{username}/cisco-setup`
+                .replace(`{${"username"}}`, encodeURIComponent(String(username)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            if (authorization != null) {
+                localVarHeaderParameter['Authorization'] = String(authorization);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -234,6 +276,20 @@ export const GatewayApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Creates Cisco Secure Client certificate import and connection creation URIs for an existing ocserv user.
+         * @summary Gateway Cisco Secure Client setup
+         * @param {string} authorization Bearer GATEWAY_API_TOKEN
+         * @param {string} username Ocserv username
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async gatewayUsersUsernameCiscoSetupPost(authorization: string, username: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GatewayCiscoSetupResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.gatewayUsersUsernameCiscoSetupPost(authorization, username, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['GatewayApi.gatewayUsersUsernameCiscoSetupPost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Deletes an existing ocserv user for an authenticated external gateway.
          * @summary Gateway ocserv user deletion
          * @param {string} authorization Bearer GATEWAY_API_TOKEN
@@ -297,6 +353,16 @@ export const GatewayApiFactory = function (configuration?: Configuration, basePa
             return localVarFp.gatewayUsersPost(requestParameters.authorization, requestParameters.request, options).then((request) => request(axios, basePath));
         },
         /**
+         * Creates Cisco Secure Client certificate import and connection creation URIs for an existing ocserv user.
+         * @summary Gateway Cisco Secure Client setup
+         * @param {GatewayApiGatewayUsersUsernameCiscoSetupPostRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        gatewayUsersUsernameCiscoSetupPost(requestParameters: GatewayApiGatewayUsersUsernameCiscoSetupPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<GatewayCiscoSetupResponse> {
+            return localVarFp.gatewayUsersUsernameCiscoSetupPost(requestParameters.authorization, requestParameters.username, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Deletes an existing ocserv user for an authenticated external gateway.
          * @summary Gateway ocserv user deletion
          * @param {GatewayApiGatewayUsersUsernameDeleteRequest} requestParameters Request parameters.
@@ -348,6 +414,27 @@ export interface GatewayApiGatewayUsersPostRequest {
      * @memberof GatewayApiGatewayUsersPost
      */
     readonly request: GatewayCreateUserData
+}
+
+/**
+ * Request parameters for gatewayUsersUsernameCiscoSetupPost operation in GatewayApi.
+ * @export
+ * @interface GatewayApiGatewayUsersUsernameCiscoSetupPostRequest
+ */
+export interface GatewayApiGatewayUsersUsernameCiscoSetupPostRequest {
+    /**
+     * Bearer GATEWAY_API_TOKEN
+     * @type {string}
+     * @memberof GatewayApiGatewayUsersUsernameCiscoSetupPost
+     */
+    readonly authorization: string
+
+    /**
+     * Ocserv username
+     * @type {string}
+     * @memberof GatewayApiGatewayUsersUsernameCiscoSetupPost
+     */
+    readonly username: string
 }
 
 /**
@@ -437,6 +524,18 @@ export class GatewayApi extends BaseAPI {
      */
     public gatewayUsersPost(requestParameters: GatewayApiGatewayUsersPostRequest, options?: RawAxiosRequestConfig) {
         return GatewayApiFp(this.configuration).gatewayUsersPost(requestParameters.authorization, requestParameters.request, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Creates Cisco Secure Client certificate import and connection creation URIs for an existing ocserv user.
+     * @summary Gateway Cisco Secure Client setup
+     * @param {GatewayApiGatewayUsersUsernameCiscoSetupPostRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GatewayApi
+     */
+    public gatewayUsersUsernameCiscoSetupPost(requestParameters: GatewayApiGatewayUsersUsernameCiscoSetupPostRequest, options?: RawAxiosRequestConfig) {
+        return GatewayApiFp(this.configuration).gatewayUsersUsernameCiscoSetupPost(requestParameters.authorization, requestParameters.username, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

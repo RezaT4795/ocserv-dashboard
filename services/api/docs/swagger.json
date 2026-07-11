@@ -546,6 +546,60 @@
                 }
             }
         },
+        "/gateway/users/{username}/cisco-setup": {
+            "post": {
+                "description": "Creates Cisco Secure Client certificate import and connection creation URIs for an existing ocserv user.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Gateway"
+                ],
+                "summary": "Gateway Cisco Secure Client setup",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer GATEWAY_API_TOKEN",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Ocserv username",
+                        "name": "username",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/gateway.CiscoSetupResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/request.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/middlewares.Unauthorized"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/request.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/gateway/users/{username}/status": {
             "get": {
                 "description": "Returns live status, expiry, traffic limit, consumed traffic, and remaining traffic for a gateway-created user.",
@@ -3789,6 +3843,32 @@
                 },
                 "date_start": {
                     "type": "string"
+                }
+            }
+        },
+        "gateway.CiscoSetupResponse": {
+            "type": "object",
+            "properties": {
+                "certificate_import_uri": {
+                    "type": "string"
+                },
+                "certificate_password": {
+                    "type": "string"
+                },
+                "connection_create_uri": {
+                    "type": "string"
+                },
+                "connection_name": {
+                    "type": "string"
+                },
+                "expires_at": {
+                    "type": "string"
+                },
+                "server_address": {
+                    "type": "string"
+                },
+                "server_port": {
+                    "type": "integer"
                 }
             }
         },

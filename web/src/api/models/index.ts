@@ -4,6 +4,7 @@ export * from './customer-model-customer';
 export * from './customer-summary-data';
 export * from './customer-summary-response';
 export * from './customer-usage-response';
+export * from './gateway-cisco-setup-response';
 export * from './gateway-create-user-data';
 export * from './gateway-create-user-response';
 export * from './gateway-delete-user-response';

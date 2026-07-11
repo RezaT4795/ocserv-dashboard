@@ -26,6 +26,7 @@ models/customer-model-customer.ts
 models/customer-summary-data.ts
 models/customer-summary-response.ts
 models/customer-usage-response.ts
+models/gateway-cisco-setup-response.ts
 models/gateway-create-user-data.ts
 models/gateway-create-user-response.ts
 models/gateway-delete-user-response.ts

@@ -1,5 +1,7 @@
 package gateway
 
+import "time"
+
 type CreateUserData struct {
 	Username       string  `json:"username" validate:"required,min=2,max=64"`
 	Password       string  `json:"password" validate:"required,min=4,max=64"`
@@ -58,4 +60,14 @@ type DeleteUserResponse struct {
 	RemoteUserID string `json:"remote_user_id"`
 	Username     string `json:"username"`
 	Deleted      bool   `json:"deleted"`
+}
+
+type CiscoSetupResponse struct {
+	CertificateImportURI string    `json:"certificate_import_uri"`
+	ConnectionCreateURI  string    `json:"connection_create_uri"`
+	CertificatePassword  string    `json:"certificate_password"`
+	ConnectionName       string    `json:"connection_name"`
+	ServerAddress        string    `json:"server_address"`
+	ServerPort           int       `json:"server_port"`
+	ExpiresAt            time.Time `json:"expires_at"`
 }

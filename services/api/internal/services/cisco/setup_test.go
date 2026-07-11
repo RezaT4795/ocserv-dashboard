@@ -65,6 +65,77 @@ func TestBuildSetup(t *testing.T) {
 		)
 	}
 
+	certificateImportURLPrefix :=
+		"https://panel.example.com:3443" +
+			certificateImportLaunchPath
+
+	if !strings.HasPrefix(
+		setup.CertificateImportURL,
+		certificateImportURLPrefix,
+	) {
+		t.Fatalf(
+			"BuildSetup() CertificateImportURL = %q, expected prefix %q",
+			setup.CertificateImportURL,
+			certificateImportURLPrefix,
+		)
+	}
+
+	connectionCreateURLPrefix :=
+		"https://panel.example.com:3443" +
+			connectionCreateLaunchPath
+
+	if !strings.HasPrefix(
+		setup.ConnectionCreateURL,
+		connectionCreateURLPrefix,
+	) {
+		t.Fatalf(
+			"BuildSetup() ConnectionCreateURL = %q, expected prefix %q",
+			setup.ConnectionCreateURL,
+			connectionCreateURLPrefix,
+		)
+	}
+
+	certificateLaunchToken := strings.TrimPrefix(
+		setup.CertificateImportURL,
+		certificateImportURLPrefix,
+	)
+	connectionLaunchToken := strings.TrimPrefix(
+		setup.ConnectionCreateURL,
+		connectionCreateURLPrefix,
+	)
+
+	if certificateLaunchToken == "" {
+		t.Fatal("CertificateImportURL token must not be empty")
+	}
+
+	if certificateLaunchToken != connectionLaunchToken {
+		t.Fatalf(
+			"launcher tokens differ: certificate = %q, connection = %q",
+			certificateLaunchToken,
+			connectionLaunchToken,
+		)
+	}
+
+	username, err := ParseCertificateToken(
+		certificateLaunchToken,
+		now,
+		"test-secret",
+	)
+	if err != nil {
+		t.Fatalf("ParseCertificateToken() error = %v", err)
+	}
+
+	if username != "test-user" {
+		t.Fatalf(
+			"launcher token username = %q, want %q",
+			username,
+			"test-user",
+		)
+	}
+
+	assertCertificateImportURI(t, setup.CertificateImportURI, now)
+	assertConnectionCreateURI(t, setup.ConnectionCreateURI)
+
 	assertCertificateImportURI(t, setup.CertificateImportURI, now)
 	assertConnectionCreateURI(t, setup.ConnectionCreateURI)
 }

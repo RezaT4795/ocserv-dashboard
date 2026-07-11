@@ -64,7 +64,9 @@ type DeleteUserResponse struct {
 
 type CiscoSetupResponse struct {
 	CertificateImportURI string    `json:"certificate_import_uri"`
+	CertificateImportURL string    `json:"certificate_import_url"`
 	ConnectionCreateURI  string    `json:"connection_create_uri"`
+	ConnectionCreateURL  string    `json:"connection_create_url"`
 	CertificatePassword  string    `json:"certificate_password"`
 	ConnectionName       string    `json:"connection_name"`
 	ServerAddress        string    `json:"server_address"`

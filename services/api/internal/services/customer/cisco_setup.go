@@ -66,7 +66,9 @@ func (ctl *Controller) CiscoSetup(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, CiscoSetupResponse{
 		CertificateImportURI: setup.CertificateImportURI,
+		CertificateImportURL: setup.CertificateImportURL,
 		ConnectionCreateURI:  setup.ConnectionCreateURI,
+		ConnectionCreateURL:  setup.ConnectionCreateURL,
 		CertificatePassword:  setup.CertificatePassword,
 		ConnectionName:       setup.ConnectionName,
 		ServerAddress:        setup.ServerAddress,

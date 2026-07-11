@@ -397,6 +397,82 @@ const docTemplate = `{
                 }
             }
         },
+        "/customers/setup/cisco/launch/certificate/{token}": {
+            "get": {
+                "description": "Redirect a short-lived signed HTTPS setup link to the Cisco Secure Client certificate import URI",
+                "produces": [
+                    "text/html"
+                ],
+                "tags": [
+                    "Customers"
+                ],
+                "summary": "Launch Cisco certificate import",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Cisco Secure Client setup token",
+                        "name": "token",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "302": {
+                        "description": "Found"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/request.ErrorResponse"
+                        }
+                    },
+                    "429": {
+                        "description": "Too Many Requests",
+                        "schema": {
+                            "$ref": "#/definitions/middlewares.TooManyRequests"
+                        }
+                    }
+                }
+            }
+        },
+        "/customers/setup/cisco/launch/connection/{token}": {
+            "get": {
+                "description": "Redirect a short-lived signed HTTPS setup link to the Cisco Secure Client connection creation URI",
+                "produces": [
+                    "text/html"
+                ],
+                "tags": [
+                    "Customers"
+                ],
+                "summary": "Launch Cisco connection creation",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Cisco Secure Client setup token",
+                        "name": "token",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "302": {
+                        "description": "Found"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/request.ErrorResponse"
+                        }
+                    },
+                    "429": {
+                        "description": "Too Many Requests",
+                        "schema": {
+                            "$ref": "#/definitions/middlewares.TooManyRequests"
+                        }
+                    }
+                }
+            }
+        },
         "/customers/summary": {
             "post": {
                 "description": "Customer summary account",
@@ -3706,8 +3782,10 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "certificate_import_uri",
+                "certificate_import_url",
                 "certificate_password",
                 "connection_create_uri",
+                "connection_create_url",
                 "connection_name",
                 "expires_at",
                 "server_address",
@@ -3717,10 +3795,16 @@ const docTemplate = `{
                 "certificate_import_uri": {
                     "type": "string"
                 },
+                "certificate_import_url": {
+                    "type": "string"
+                },
                 "certificate_password": {
                     "type": "string"
                 },
                 "connection_create_uri": {
+                    "type": "string"
+                },
+                "connection_create_url": {
                     "type": "string"
                 },
                 "connection_name": {
@@ -3859,10 +3943,16 @@ const docTemplate = `{
                 "certificate_import_uri": {
                     "type": "string"
                 },
+                "certificate_import_url": {
+                    "type": "string"
+                },
                 "certificate_password": {
                     "type": "string"
                 },
                 "connection_create_uri": {
+                    "type": "string"
+                },
+                "connection_create_url": {
                     "type": "string"
                 },
                 "connection_name": {

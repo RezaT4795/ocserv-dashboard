@@ -1,8 +1,9 @@
 package customer
 
 import (
-	"github.com/mmtaee/ocserv-dashboard/api/internal/repository"
 	"time"
+
+	"github.com/mmtaee/ocserv-dashboard/api/internal/repository"
 )
 
 type SummaryData struct {
@@ -37,7 +38,9 @@ type SummaryResponse struct {
 
 type CiscoSetupResponse struct {
 	CertificateImportURI string    `json:"certificate_import_uri" validate:"required"`
+	CertificateImportURL string    `json:"certificate_import_url" validate:"required"`
 	ConnectionCreateURI  string    `json:"connection_create_uri" validate:"required"`
+	ConnectionCreateURL  string    `json:"connection_create_url" validate:"required"`
 	CertificatePassword  string    `json:"certificate_password" validate:"required"`
 	ConnectionName       string    `json:"connection_name" validate:"required"`
 	ServerAddress        string    `json:"server_address" validate:"required"`

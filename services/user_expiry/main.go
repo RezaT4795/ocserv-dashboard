@@ -3,13 +3,14 @@ package main
 import (
 	"context"
 	"flag"
+	"os"
+	"os/signal"
+	"syscall"
+
 	"github.com/mmtaee/ocserv-dashboard/common/pkg/config"
 	"github.com/mmtaee/ocserv-dashboard/common/pkg/database"
 	"github.com/mmtaee/ocserv-dashboard/common/pkg/logger"
 	"github.com/mmtaee/ocserv-dashboard/user_expiry/internal/service"
-	"os"
-	"os/signal"
-	"syscall"
 )
 
 var (
@@ -19,7 +20,7 @@ var (
 
 func main() {
 	flag.BoolVar(&debug, "d", false, "debug mode")
-	flag.BoolVar(&dockerMode, "docker-mode", true, "Docker Mode")
+	flag.BoolVar(&dockerMode, "docker-mode", false, "Docker Mode")
 	flag.Parse()
 
 	ctx, cancel := context.WithCancel(context.Background())

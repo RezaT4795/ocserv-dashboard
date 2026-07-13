@@ -4,11 +4,14 @@ import (
 	"bufio"
 	"bytes"
 	"context"
-	"github.com/mmtaee/ocserv-dashboard/common/models"
-	"github.com/mmtaee/ocserv-dashboard/common/pkg/utils"
+	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/mmtaee/ocserv-dashboard/common/models"
+	"github.com/mmtaee/ocserv-dashboard/common/pkg/utils"
 )
 
 type OcservUser struct{}
@@ -77,16 +80,33 @@ func (u *OcservUser) Create(group, username, password string, config *models.Ocs
 // Lock disables a user account by running ocpasswd with the -l flag.
 // Returns the command output or an error.
 func (u *OcservUser) Lock(username string) (string, error) {
-	output, err := utils.RunOcpasswd("-l", "-c", utils.OcpasswdPath, username)
-	if err != nil {
-		return "", err
+	output, passwordErr := utils.RunOcpasswd(
+		"-l",
+		"-c",
+		utils.OcpasswdPath,
+		username,
+	)
+
+	certificateErr := u.SuspendCertificate(username)
+
+	if passwordErr != nil {
+		passwordErr = fmt.Errorf(
+			"lock password authentication: %w",
+			passwordErr,
+		)
 	}
 
-	if err = u.SuspendCertificate(username); err != nil {
-		return output, err
+	if certificateErr != nil {
+		certificateErr = fmt.Errorf(
+			"suspend certificate authentication: %w",
+			certificateErr,
+		)
 	}
 
-	return output, nil
+	return output, errors.Join(
+		passwordErr,
+		certificateErr,
+	)
 }
 
 // UnLock re-enables a previously locked user account by running ocpasswd

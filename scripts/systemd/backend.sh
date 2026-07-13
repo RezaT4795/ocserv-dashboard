@@ -152,7 +152,7 @@ for service in "${!SERVICES[@]}"; do
   case "$service" in
     api)         ARGS="serve --host 127.0.0.1 --port 8080" ;;
     log_stream)  ARGS="-h 127.0.0.1 -p 8081" ;;
-    user_expiry) ARGS="" ;;
+    user_expiry) ARGS="-docker-mode=false" ;;
     telegram_bot) ARGS="" ;;
     *)           ARGS="" ;;
   esac

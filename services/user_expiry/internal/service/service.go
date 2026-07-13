@@ -2,6 +2,11 @@ package service
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"sync"
+	"time"
+
 	commonModels "github.com/mmtaee/ocserv-dashboard/common/models"
 	occtlDocker "github.com/mmtaee/ocserv-dashboard/common/occtl_docker"
 	"github.com/mmtaee/ocserv-dashboard/common/ocserv/occtl"
@@ -12,36 +17,43 @@ import (
 	stateManager "github.com/mmtaee/ocserv-dashboard/user_expiry/pkg/state"
 	"github.com/robfig/cron/v3"
 	"gorm.io/gorm"
-	"sync"
-	"time"
 )
+
+type userAction func(string) (string, error)
 
 // CornService handles all scheduled background jobs related to
 // user expiration, monthly reactivation and auto-deletion.
 //
 // It supports both docker-mode and native ocserv mode.
+
 type CornService struct {
-	occtlHandler      occtl.OcservOcctlInterface
-	ocservUserHandler user.OcservUserInterface
-	occtlDockerRepo   occtlDocker.OcservOcctlUsersDocker
-	dockerMode        bool
+	disconnectUser userAction
+	lockUser       userAction
+	unlockUser     userAction
 }
 
 // NewCornService initializes cron service.
 // If dockerMode is true, docker-based occtl commands will be used.
 // Otherwise, native ocserv handlers are used.
 func NewCornService(dockerMode bool) *CornService {
-	s := &CornService{
-		dockerMode: dockerMode,
+	if dockerMode {
+		dockerRepo := occtlDocker.NewOcservOcctlDocker()
+
+		return &CornService{
+			disconnectUser: dockerRepo.DisconnectUser,
+			lockUser:       dockerRepo.Lock,
+			unlockUser:     dockerRepo.Unlock,
+		}
 	}
 
-	if dockerMode {
-		s.occtlDockerRepo = occtlDocker.NewOcservOcctlDocker()
-	} else {
-		s.occtlHandler = occtl.NewOcservOcctl()
-		s.ocservUserHandler = user.NewOcservUser()
+	occtlHandler := occtl.NewOcservOcctl()
+	ocservUserHandler := user.NewOcservUser()
+
+	return &CornService{
+		disconnectUser: occtlHandler.DisconnectUser,
+		lockUser:       ocservUserHandler.Lock,
+		unlockUser:     ocservUserHandler.UnLock,
 	}
-	return s
 }
 
 // MissedCron checks whether daily or monthly cron jobs were missed
@@ -165,24 +177,35 @@ func (c *CornService) UserExpiryCron(ctx context.Context) {
 // and deactivates them.
 //
 // Actions performed per user:
-//   - Set deactivated_at = now
-//   - Set is_locked = true
-//   - Disconnect active session
-//   - Lock user in ocserv
+//   - Lock password and certificate authentication
+//   - Disconnect active sessions
+//   - Set deactivated_at = now and is_locked = true after enforcement succeeds
 //
 // Runs concurrently with max 10 workers.
-func (c *CornService) ExpireUsers(ctx context.Context, db *gorm.DB) {
+func (c *CornService) ExpireUsers(
+	ctx context.Context,
+	db *gorm.DB,
+) {
 	var users []commonModels.OcservUser
 
-	pastDay := time.Now().UTC().AddDate(0, 0, -1)
+	today := time.Now().
+		UTC().
+		Truncate(24 * time.Hour)
+
 	err := db.WithContext(ctx).
 		Select("id", "username", "expire_at").
 		Where("expire_at IS NOT NULL").
-		Where("deactivated_at IS NULL").
-		Where("expire_at < ?", pastDay).
-		Find(&users).Error
+		Where("expire_at < ?", today).
+		Find(&users).
+		Error
+
 	if err != nil {
-		logger.Error("Failed to get users: %v", err)
+		logger.Error(
+			"Failed to get users: %v",
+			err,
+		)
+
+		return
 	}
 
 	var wg sync.WaitGroup
@@ -194,41 +217,70 @@ func (c *CornService) ExpireUsers(ctx context.Context, db *gorm.DB) {
 
 		go func(u commonModels.OcservUser) {
 			defer wg.Done()
-			defer func() { <-sem }()
+			defer func() {
+				<-sem
+			}()
 
-			// Update DB user
-			if err2 := db.Model(&u).Updates(map[string]interface{}{ // CHANGED: using &u (copied)
-				"deactivated_at": time.Now(),
-				"is_locked":      true,
-			}).Error; err2 != nil {
-				logger.Error("Failed to update user: %v", err2)
+			if err := c.enforceExpiredUser(
+				u.Username,
+			); err != nil {
+				logger.Error(
+					"Failed to enforce expiry for user %s: %v",
+					u.Username,
+					err,
+				)
+
 				return
 			}
 
-			var (
-				disconnect func(string) (string, error)
-				lock       func(string) (string, error)
-			)
+			now := time.Now().UTC()
 
-			if c.dockerMode {
-				disconnect = c.occtlDockerRepo.DisconnectUser
-				lock = c.occtlDockerRepo.Lock
-			} else {
-				disconnect = c.occtlHandler.DisconnectUser
-				lock = c.ocservUserHandler.Lock
+			if err := db.WithContext(ctx).
+				Model(&commonModels.OcservUser{}).
+				Where("id = ?", u.ID).
+				Updates(map[string]interface{}{
+					"deactivated_at": now,
+					"is_locked":      true,
+				}).
+				Error; err != nil {
+				logger.Error(
+					"Failed to update expired user %s: %v",
+					u.Username,
+					err,
+				)
 			}
-
-			if _, err3 := disconnect(u.Username); err3 != nil {
-				logger.Error("Failed to disconnect user %s: %v", u.Username, err3)
-			}
-			if _, err4 := lock(u.Username); err4 != nil {
-				logger.Error("Failed to lock user %s: %v", u.Username, err4)
-			}
-			return
 		}(u)
 	}
 
 	wg.Wait()
+}
+
+func (c *CornService) enforceExpiredUser(
+	username string,
+) error {
+	var enforcementErrors []error
+
+	if _, err := c.lockUser(username); err != nil {
+		enforcementErrors = append(
+			enforcementErrors,
+			fmt.Errorf(
+				"lock authentication: %w",
+				err,
+			),
+		)
+	}
+
+	if _, err := c.disconnectUser(username); err != nil {
+		enforcementErrors = append(
+			enforcementErrors,
+			fmt.Errorf(
+				"disconnect sessions: %w",
+				err,
+			),
+		)
+	}
+
+	return errors.Join(enforcementErrors...)
 }
 
 // ActiveMonthlyUsers reactivates monthly traffic users
@@ -287,15 +339,14 @@ func (c *CornService) ActiveMonthlyUsers(ctx context.Context, db *gorm.DB) {
 				return
 			}
 
-			var unlock func(string) (string, error)
-
-			if c.dockerMode {
-				unlock = c.occtlDockerRepo.Unlock
-			} else {
-				unlock = c.ocservUserHandler.UnLock
-			}
-			if _, err2 := unlock(u.Username); err2 != nil {
-				logger.Error("Failed to unlock user %s: %v", u.Username, err2)
+			if _, err2 := c.unlockUser(
+				u.Username,
+			); err2 != nil {
+				logger.Error(
+					"Failed to unlock user %s: %v",
+					u.Username,
+					err2,
+				)
 			}
 
 		}(u)

@@ -229,6 +229,10 @@ definitions:
         type: string
       reset_traffic_usage:
         type: boolean
+      traffic_limit_bytes:
+        maximum: 107374182400000
+        minimum: 1
+        type: integer
       traffic_limit_gb:
         maximum: 100000
         minimum: 1
@@ -1932,8 +1936,8 @@ paths:
     patch:
       consumes:
       - application/json
-      description: Updates traffic limit, expiry date, traffic usage reset, activation
-        state, and group for a gateway-created user.
+      description: Updates the exact traffic limit in GiB or bytes, expiry date, traffic
+        usage reset, activation state, and group for a gateway-created user.
       parameters:
       - description: Bearer GATEWAY_API_TOKEN
         in: header

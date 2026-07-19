@@ -31,6 +31,12 @@ export interface CustomerCiscoSetupResponse {
      * @type {string}
      * @memberof CustomerCiscoSetupResponse
      */
+    'certificate_import_url': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CustomerCiscoSetupResponse
+     */
     'certificate_password': string;
     /**
      * 
@@ -38,6 +44,12 @@ export interface CustomerCiscoSetupResponse {
      * @memberof CustomerCiscoSetupResponse
      */
     'connection_create_uri': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CustomerCiscoSetupResponse
+     */
+    'connection_create_url': string;
     /**
      * 
      * @type {string}

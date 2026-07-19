@@ -157,7 +157,7 @@ func (ctl *Controller) UserStatus(c echo.Context) error {
 // UpdateUserSubscription updates traffic, expiry, activation state, and group for an existing gateway user.
 //
 // @Summary      Gateway ocserv user subscription update
-// @Description  Updates traffic limit, expiry date, traffic usage reset, activation state, and group for a gateway-created user.
+// @Description  Updates the exact traffic limit in GiB or bytes, expiry date, traffic usage reset, activation state, and group for a gateway-created user.
 // @Tags         Gateway
 // @Accept       json
 // @Produce      json
@@ -194,10 +194,11 @@ func (ctl *Controller) UpdateUserSubscription(c echo.Context) error {
 		update.Group = &group
 	}
 
-	if data.TrafficLimitGB != nil {
-		trafficSize := int64(*data.TrafficLimitGB) * bytesInGiB
-		update.TrafficSize = &trafficSize
+	trafficSize, err := resolveSubscriptionTrafficSize(data)
+	if err != nil {
+		return ctl.request.BadRequest(c, err)
 	}
+	update.TrafficSize = trafficSize
 
 	if data.Unlimited {
 		update.SetExpireAt = true
@@ -248,6 +249,29 @@ func (ctl *Controller) UpdateUserSubscription(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, response)
+}
+
+func resolveSubscriptionTrafficSize(
+	data UpdateUserSubscriptionData,
+) (*int64, error) {
+	if data.TrafficLimitGB != nil &&
+		data.TrafficLimitBytes != nil {
+		return nil, errors.New(
+			"traffic_limit_gb and traffic_limit_bytes cannot be used together",
+		)
+	}
+
+	if data.TrafficLimitBytes != nil {
+		trafficSize := *data.TrafficLimitBytes
+		return &trafficSize, nil
+	}
+
+	if data.TrafficLimitGB != nil {
+		trafficSize := int64(*data.TrafficLimitGB) * bytesInGiB
+		return &trafficSize, nil
+	}
+
+	return nil, nil
 }
 
 // DeleteUser deletes an existing gateway-created ocserv user.

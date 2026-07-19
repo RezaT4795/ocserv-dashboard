@@ -49,6 +49,12 @@ export interface GatewayUpdateUserSubscriptionData {
      * @type {number}
      * @memberof GatewayUpdateUserSubscriptionData
      */
+    'traffic_limit_bytes'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GatewayUpdateUserSubscriptionData
+     */
     'traffic_limit_gb'?: number;
     /**
      * 

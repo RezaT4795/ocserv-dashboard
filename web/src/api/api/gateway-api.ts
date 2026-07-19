@@ -206,7 +206,7 @@ export const GatewayApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * Updates traffic limit, expiry date, traffic usage reset, activation state, and group for a gateway-created user.
+         * Updates the exact traffic limit in GiB or bytes, expiry date, traffic usage reset, activation state, and group for a gateway-created user.
          * @summary Gateway ocserv user subscription update
          * @param {string} authorization Bearer GATEWAY_API_TOKEN
          * @param {string} username Ocserv username
@@ -318,7 +318,7 @@ export const GatewayApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Updates traffic limit, expiry date, traffic usage reset, activation state, and group for a gateway-created user.
+         * Updates the exact traffic limit in GiB or bytes, expiry date, traffic usage reset, activation state, and group for a gateway-created user.
          * @summary Gateway ocserv user subscription update
          * @param {string} authorization Bearer GATEWAY_API_TOKEN
          * @param {string} username Ocserv username
@@ -383,7 +383,7 @@ export const GatewayApiFactory = function (configuration?: Configuration, basePa
             return localVarFp.gatewayUsersUsernameStatusGet(requestParameters.authorization, requestParameters.username, options).then((request) => request(axios, basePath));
         },
         /**
-         * Updates traffic limit, expiry date, traffic usage reset, activation state, and group for a gateway-created user.
+         * Updates the exact traffic limit in GiB or bytes, expiry date, traffic usage reset, activation state, and group for a gateway-created user.
          * @summary Gateway ocserv user subscription update
          * @param {GatewayApiGatewayUsersUsernameSubscriptionPatchRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
@@ -563,7 +563,7 @@ export class GatewayApi extends BaseAPI {
     }
 
     /**
-     * Updates traffic limit, expiry date, traffic usage reset, activation state, and group for a gateway-created user.
+     * Updates the exact traffic limit in GiB or bytes, expiry date, traffic usage reset, activation state, and group for a gateway-created user.
      * @summary Gateway ocserv user subscription update
      * @param {GatewayApiGatewayUsersUsernameSubscriptionPatchRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.

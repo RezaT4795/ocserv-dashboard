@@ -742,7 +742,7 @@ const docTemplate = `{
         },
         "/gateway/users/{username}/subscription": {
             "patch": {
-                "description": "Updates traffic limit, expiry date, traffic usage reset, activation state, and group for a gateway-created user.",
+                "description": "Updates the exact traffic limit in GiB or bytes, expiry date, traffic usage reset, activation state, and group for a gateway-created user.",
                 "consumes": [
                     "application/json"
                 ],
@@ -4081,6 +4081,11 @@ const docTemplate = `{
                 },
                 "reset_traffic_usage": {
                     "type": "boolean"
+                },
+                "traffic_limit_bytes": {
+                    "type": "integer",
+                    "maximum": 107374182400000,
+                    "minimum": 1
                 },
                 "traffic_limit_gb": {
                     "type": "integer",

@@ -144,6 +144,74 @@ export const CustomersApiAxiosParamCreator = function (configuration?: Configura
             };
         },
         /**
+         * Redirect a short-lived signed HTTPS setup link to the Cisco Secure Client certificate import URI
+         * @summary Launch Cisco certificate import
+         * @param {string} token Cisco Secure Client setup token
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        customersSetupCiscoLaunchCertificateTokenGet: async (token: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'token' is not null or undefined
+            assertParamExists('customersSetupCiscoLaunchCertificateTokenGet', 'token', token)
+            const localVarPath = `/customers/setup/cisco/launch/certificate/{token}`
+                .replace(`{${"token"}}`, encodeURIComponent(String(token)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Redirect a short-lived signed HTTPS setup link to the Cisco Secure Client connection creation URI
+         * @summary Launch Cisco connection creation
+         * @param {string} token Cisco Secure Client setup token
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        customersSetupCiscoLaunchConnectionTokenGet: async (token: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'token' is not null or undefined
+            assertParamExists('customersSetupCiscoLaunchConnectionTokenGet', 'token', token)
+            const localVarPath = `/customers/setup/cisco/launch/connection/{token}`
+                .replace(`{${"token"}}`, encodeURIComponent(String(token)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Create Cisco Secure Client certificate import and connection creation URIs using ocserv username/password
          * @summary Create customer Cisco Secure Client setup links
          * @param {CustomerSummaryData} request customer username and password (same ocserv account).
@@ -265,6 +333,32 @@ export const CustomersApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Redirect a short-lived signed HTTPS setup link to the Cisco Secure Client certificate import URI
+         * @summary Launch Cisco certificate import
+         * @param {string} token Cisco Secure Client setup token
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async customersSetupCiscoLaunchCertificateTokenGet(token: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.customersSetupCiscoLaunchCertificateTokenGet(token, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['CustomersApi.customersSetupCiscoLaunchCertificateTokenGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Redirect a short-lived signed HTTPS setup link to the Cisco Secure Client connection creation URI
+         * @summary Launch Cisco connection creation
+         * @param {string} token Cisco Secure Client setup token
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async customersSetupCiscoLaunchConnectionTokenGet(token: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.customersSetupCiscoLaunchConnectionTokenGet(token, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['CustomersApi.customersSetupCiscoLaunchConnectionTokenGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Create Cisco Secure Client certificate import and connection creation URIs using ocserv username/password
          * @summary Create customer Cisco Secure Client setup links
          * @param {CustomerSummaryData} request customer username and password (same ocserv account).
@@ -331,6 +425,26 @@ export const CustomersApiFactory = function (configuration?: Configuration, base
             return localVarFp.customersSetupCiscoCertificateTokenGet(requestParameters.token, options).then((request) => request(axios, basePath));
         },
         /**
+         * Redirect a short-lived signed HTTPS setup link to the Cisco Secure Client certificate import URI
+         * @summary Launch Cisco certificate import
+         * @param {CustomersApiCustomersSetupCiscoLaunchCertificateTokenGetRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        customersSetupCiscoLaunchCertificateTokenGet(requestParameters: CustomersApiCustomersSetupCiscoLaunchCertificateTokenGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.customersSetupCiscoLaunchCertificateTokenGet(requestParameters.token, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Redirect a short-lived signed HTTPS setup link to the Cisco Secure Client connection creation URI
+         * @summary Launch Cisco connection creation
+         * @param {CustomersApiCustomersSetupCiscoLaunchConnectionTokenGetRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        customersSetupCiscoLaunchConnectionTokenGet(requestParameters: CustomersApiCustomersSetupCiscoLaunchConnectionTokenGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.customersSetupCiscoLaunchConnectionTokenGet(requestParameters.token, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Create Cisco Secure Client certificate import and connection creation URIs using ocserv username/password
          * @summary Create customer Cisco Secure Client setup links
          * @param {CustomersApiCustomersSetupCiscoPostRequest} requestParameters Request parameters.
@@ -391,6 +505,34 @@ export interface CustomersApiCustomersSetupCiscoCertificateTokenGetRequest {
      * Cisco Secure Client setup certificate token
      * @type {string}
      * @memberof CustomersApiCustomersSetupCiscoCertificateTokenGet
+     */
+    readonly token: string
+}
+
+/**
+ * Request parameters for customersSetupCiscoLaunchCertificateTokenGet operation in CustomersApi.
+ * @export
+ * @interface CustomersApiCustomersSetupCiscoLaunchCertificateTokenGetRequest
+ */
+export interface CustomersApiCustomersSetupCiscoLaunchCertificateTokenGetRequest {
+    /**
+     * Cisco Secure Client setup token
+     * @type {string}
+     * @memberof CustomersApiCustomersSetupCiscoLaunchCertificateTokenGet
+     */
+    readonly token: string
+}
+
+/**
+ * Request parameters for customersSetupCiscoLaunchConnectionTokenGet operation in CustomersApi.
+ * @export
+ * @interface CustomersApiCustomersSetupCiscoLaunchConnectionTokenGetRequest
+ */
+export interface CustomersApiCustomersSetupCiscoLaunchConnectionTokenGetRequest {
+    /**
+     * Cisco Secure Client setup token
+     * @type {string}
+     * @memberof CustomersApiCustomersSetupCiscoLaunchConnectionTokenGet
      */
     readonly token: string
 }
@@ -464,6 +606,30 @@ export class CustomersApi extends BaseAPI {
      */
     public customersSetupCiscoCertificateTokenGet(requestParameters: CustomersApiCustomersSetupCiscoCertificateTokenGetRequest, options?: RawAxiosRequestConfig) {
         return CustomersApiFp(this.configuration).customersSetupCiscoCertificateTokenGet(requestParameters.token, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Redirect a short-lived signed HTTPS setup link to the Cisco Secure Client certificate import URI
+     * @summary Launch Cisco certificate import
+     * @param {CustomersApiCustomersSetupCiscoLaunchCertificateTokenGetRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof CustomersApi
+     */
+    public customersSetupCiscoLaunchCertificateTokenGet(requestParameters: CustomersApiCustomersSetupCiscoLaunchCertificateTokenGetRequest, options?: RawAxiosRequestConfig) {
+        return CustomersApiFp(this.configuration).customersSetupCiscoLaunchCertificateTokenGet(requestParameters.token, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Redirect a short-lived signed HTTPS setup link to the Cisco Secure Client connection creation URI
+     * @summary Launch Cisco connection creation
+     * @param {CustomersApiCustomersSetupCiscoLaunchConnectionTokenGetRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof CustomersApi
+     */
+    public customersSetupCiscoLaunchConnectionTokenGet(requestParameters: CustomersApiCustomersSetupCiscoLaunchConnectionTokenGetRequest, options?: RawAxiosRequestConfig) {
+        return CustomersApiFp(this.configuration).customersSetupCiscoLaunchConnectionTokenGet(requestParameters.token, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

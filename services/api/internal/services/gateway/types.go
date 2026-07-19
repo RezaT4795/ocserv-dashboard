@@ -49,6 +49,7 @@ type UserStatusResponse struct {
 
 type UpdateUserSubscriptionData struct {
 	TrafficLimitGB    *int    `json:"traffic_limit_gb" validate:"omitempty,min=1,max=100000"`
+	TrafficLimitBytes *int64  `json:"traffic_limit_bytes" validate:"omitempty,min=1,max=107374182400000"`
 	ExpireAt          *string `json:"expire_at" validate:"omitempty" example:"2026-12-31"`
 	Unlimited         bool    `json:"unlimited" validate:"omitempty"`
 	ResetTrafficUsage bool    `json:"reset_traffic_usage" validate:"omitempty"`

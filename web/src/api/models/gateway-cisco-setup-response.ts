@@ -31,6 +31,12 @@ export interface GatewayCiscoSetupResponse {
      * @type {string}
      * @memberof GatewayCiscoSetupResponse
      */
+    'certificate_import_url'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GatewayCiscoSetupResponse
+     */
     'certificate_password'?: string;
     /**
      * 
@@ -38,6 +44,12 @@ export interface GatewayCiscoSetupResponse {
      * @memberof GatewayCiscoSetupResponse
      */
     'connection_create_uri'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GatewayCiscoSetupResponse
+     */
+    'connection_create_url'?: string;
     /**
      * 
      * @type {string}

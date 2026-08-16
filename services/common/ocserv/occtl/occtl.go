@@ -77,10 +77,23 @@ func (o *OcservOcctl) OnlineSessions() ([]models.OnlineUserSession, error) {
 func (o *OcservOcctl) DisconnectUser(username string) (string, error) {
 	cmd := exec.Command(occtlExec, "disconnect", "user", username)
 	out, err := cmd.CombinedOutput()
-	if err != nil {
-		return "", err
+
+	return normalizeDisconnectUserResult(string(out), err)
+}
+
+func normalizeDisconnectUserResult(output string, err error) (string, error) {
+	if err == nil {
+		return output, nil
 	}
-	return string(out), nil
+
+	if strings.Contains(
+		strings.ToLower(strings.TrimSpace(output)),
+		"could not disconnect user",
+	) {
+		return output, nil
+	}
+
+	return output, err
 }
 
 // DisconnectSession Disconnect the specified ID.

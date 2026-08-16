@@ -38,30 +38,34 @@ const showDateMenu = ref(false);
                         </div>
                     </v-col>
                     <v-col cols="12">
-                        <v-menu v-model="showDateMenu" :close-on-content-click="false" transition="scale-transition">
-                            <template #activator="{ props }">
-                                <v-label class="font-weight-bold mb-1 text-capitalize">
-                                    {{ t('NEW_EXPIRE_AT') }}
-                                </v-label>
-                                <v-text-field
-                                    :model-value="expireAt ? formatDate(expireAt) : ''"
-                                    color="primary"
-                                    hide-details
-                                    readonly
-                                    v-bind="props"
-                                    variant="outlined"
-                                    clearable
-                                    @click:clear="expireAt = null"
+                        <v-label class="font-weight-bold mb-1 text-capitalize">
+                            {{ t('NEW_EXPIRE_AT') }}
+                        </v-label>
+
+                        <v-locale-provider :rtl="false">
+                            <v-menu v-model="showDateMenu" :close-on-content-click="false" transition="scale-transition">
+                                <template #activator="{ props }">
+                                    <v-text-field
+                                        :model-value="expireAt ? formatDate(expireAt) : ''"
+                                        color="primary"
+                                        hide-details
+                                        readonly
+                                        v-bind="props"
+                                        variant="outlined"
+                                        clearable
+                                        @click:clear="expireAt = null"
+                                    />
+                                </template>
+
+                                <v-date-picker
+                                    v-model="expireAt"
+                                    :header="t('EXPIRE_AT')"
+                                    elevation="24"
+                                    title=""
+                                    @update:model-value="() => (showDateMenu = false)"
                                 />
-                            </template>
-                            <v-date-picker
-                                v-model="expireAt"
-                                :header="t('EXPIRE_AT')"
-                                elevation="24"
-                                title=""
-                                @update:model-value="() => (showDateMenu = false)"
-                            />
-                        </v-menu>
+                            </v-menu>
+                        </v-locale-provider>
                     </v-col>
                 </v-row>
             </v-card-text>
